@@ -322,15 +322,14 @@
 
     /* ─── App body layout ─── */
     .app-body {
-      display: flex;
       height: calc(100vh - 108px);
       overflow: hidden;
     }
     .board-wrap {
-      flex: 1;
+      width: 100%;
+      height: 100%;
       overflow-x: auto;
       overflow-y: auto;
-      min-width: 0;
     }
     .board-wrap::-webkit-scrollbar { height: 8px; width: 4px; }
     .board-wrap::-webkit-scrollbar-track { background: transparent; }
@@ -338,17 +337,21 @@
 
     /* ─── Side panel ─── */
     .side-panel {
-      width: 0;
-      flex-shrink: 0;
+      position: fixed;
+      top: 0; right: 0; bottom: 0;
+      width: 480px;
       background: white;
       border-left: 1px solid var(--border);
       overflow: hidden;
-      transition: width 0.25s cubic-bezier(0.4,0,0.2,1);
+      transform: translateX(100%);
+      transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
       display: flex;
       flex-direction: column;
+      z-index: 50;
+      box-shadow: -4px 0 20px rgba(0,0,0,0.08);
     }
     .side-panel.open {
-      width: 480px;
+      transform: translateX(0);
     }
     .side-panel-inner {
       width: 480px;
