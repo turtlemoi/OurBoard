@@ -153,6 +153,40 @@
     .add-btn:hover { background: rgba(0,0,0,0.05); color: var(--text); }
     .add-btn span { font-size: 16px; line-height: 1; }
 
+    /* ─── Inline card form ─── */
+    .inline-form {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 8px;
+      box-shadow: var(--shadow);
+      border: 1.5px solid #0c66e4;
+      margin-top: 4px;
+    }
+    .inline-form textarea {
+      width: 100%; border: none; outline: none;
+      font-size: 13px; font-family: inherit;
+      resize: none; line-height: 1.5;
+      min-height: 52px; background: transparent;
+      color: var(--text);
+    }
+    .inline-form-actions {
+      display: flex; gap: 6px; margin-top: 6px;
+    }
+    .inline-form-actions .btn-save {
+      padding: 5px 12px; border-radius: 5px;
+      background: #0c66e4; color: white;
+      border: none; font-size: 12px; font-weight: 600;
+      cursor: pointer;
+    }
+    .inline-form-actions .btn-save:hover { background: #0550bf; }
+    .inline-form-actions .btn-cancel {
+      padding: 5px 8px; border-radius: 5px;
+      background: none; border: none;
+      color: var(--text-muted); font-size: 18px; line-height: 1;
+      cursor: pointer;
+    }
+    .inline-form-actions .btn-cancel:hover { color: var(--text); }
+
     /* ─── Card ─── */
     .card {
       background: var(--card-bg);
@@ -636,9 +670,16 @@ function renderBoard() {
           ? '<div class="empty-state">카드 없음</div>'
           : colCards.map(c => renderCard(c)).join('')}
       </div>
-      <button class="add-btn" onclick="window.openAddModal('${col.id}')">
+      <button class="add-btn" id="addbtn-${col.id}" onclick="window.openInlineForm('${col.id}')">
         <span>+</span> 신규 요청
       </button>
+      <div class="inline-form hidden" id="inline-${col.id}">
+        <textarea id="inline-input-${col.id}" placeholder="카드 제목을 입력하세요..." rows="2"></textarea>
+        <div class="inline-form-actions">
+          <button class="btn-save" onclick="window.saveInlineCard('${col.id}')">추가</button>
+          <button class="btn-cancel" onclick="window.closeInlineForm('${col.id}')" title="취소">✕</button>
+        </div>
+      </div>
     `;
     board.appendChild(colEl);
   });
@@ -702,6 +743,53 @@ window._drop = async (e, colId) => {
     showToast(`"${colId}" 으로 이동했습니다`);
   }
   dragCardId = null;
+};
+
+// ════════════════════════════════════════════
+//  INLINE CARD FORM
+// ════════════════════════════════════════════
+window.openInlineForm = (colId) => {
+  if (!db) { showToast('Firebase 연결 후 사용 가능합니다'); return; }
+  // 다른 컬럼의 인라인 폼 닫기
+  COLUMNS.forEach(c => {
+    if (c.id !== colId) closeInlineForm(c.id);
+  });
+  const form = document.getElementById('inline-' + colId);
+  const btn  = document.getElementById('addbtn-' + colId);
+  const input = document.getElementById('inline-input-' + colId);
+  if (!form) return;
+  form.classList.remove('hidden');
+  btn.classList.add('hidden');
+  input.value = '';
+  input.focus();
+};
+
+window.closeInlineForm = (colId) => {
+  const form = document.getElementById('inline-' + colId);
+  const btn  = document.getElementById('addbtn-' + colId);
+  if (!form) return;
+  form.classList.add('hidden');
+  btn?.classList.remove('hidden');
+};
+
+window.saveInlineCard = async (colId) => {
+  const input = document.getElementById('inline-input-' + colId);
+  const title = input?.value.trim();
+  if (!title) { input?.focus(); return; }
+  try {
+    await addDoc(collection(db, 'cards'), {
+      title,
+      status: colId,
+      icon: '📌',
+      category: '',
+      assignee: '',
+      description: '',
+      createdAt: serverTimestamp(),
+    });
+    closeInlineForm(colId);
+  } catch (e) {
+    showToast('오류: ' + e.message);
+  }
 };
 
 // ════════════════════════════════════════════
@@ -942,10 +1030,20 @@ document.addEventListener('keydown', e => {
     document.getElementById('detailModal').classList.add('hidden');
     document.getElementById('userModal').classList.add('hidden');
     document.getElementById('guideModal').classList.add('hidden');
+    COLUMNS.forEach(c => closeInlineForm(c.id));
   }
   if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
     if (!document.getElementById('cardModal').classList.contains('hidden')) {
       saveCard();
+    }
+  }
+  // 인라인 폼: Enter=저장, Shift+Enter=줄바꿈
+  if (e.key === 'Enter' && !e.shiftKey) {
+    const active = document.activeElement;
+    const match = active?.id?.match(/^inline-input-(.+)$/);
+    if (match) {
+      e.preventDefault();
+      saveInlineCard(match[1]);
     }
   }
 });
