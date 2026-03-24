@@ -94,15 +94,9 @@
       display: flex;
       gap: 12px;
       padding: 16px 40px 24px;
-      overflow-x: auto;
-      min-height: calc(100vh - 120px);
       align-items: flex-start;
-      max-width: 1800px;
-      margin: 0 auto;
+      min-width: max-content;
     }
-    .board::-webkit-scrollbar { height: 8px; }
-    .board::-webkit-scrollbar-track { background: transparent; }
-    .board::-webkit-scrollbar-thumb { background: #c0c4cf; border-radius: 4px; }
 
     /* ─── Column ─── */
     .column {
@@ -332,16 +326,12 @@
     .board-wrap {
       flex: 1;
       overflow-x: auto;
-      overflow-y: hidden;
+      overflow-y: auto;
       min-width: 0;
     }
-    .board-wrap .board {
-      max-width: none;
-      margin: 0;
-      height: 100%;
-      min-height: unset;
-      align-items: flex-start;
-    }
+    .board-wrap::-webkit-scrollbar { height: 8px; width: 4px; }
+    .board-wrap::-webkit-scrollbar-track { background: transparent; }
+    .board-wrap::-webkit-scrollbar-thumb { background: #c0c4cf; border-radius: 4px; }
 
     /* ─── Side panel ─── */
     .side-panel {
