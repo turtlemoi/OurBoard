@@ -1712,6 +1712,14 @@ document.addEventListener('keydown', e => {
 // Click outside closes assignee dropdown
 document.addEventListener('click', () => closeAssigneeDropdown());
 
+// 보드 빈 영역 클릭 시 사이드 패널 닫기
+document.getElementById('board').addEventListener('click', e => {
+  if (document.getElementById('sidePanel').classList.contains('open')
+      && !e.target.closest('.card')) {
+    closeSidePanel();
+  }
+});
+
 // Click outside modal closes it
 ['cardModal','userModal','guideModal'].forEach(id => {
   document.getElementById(id)?.addEventListener('click', function(e) {
