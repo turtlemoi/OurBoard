@@ -440,6 +440,7 @@
     </div>
     <div class="detail-desc" id="detailDesc"></div>
     <div class="modal-actions">
+      <button class="btn btn-danger" id="detailDeleteBtn">삭제</button>
       <button class="btn" onclick="closeDetailModal()">닫기</button>
       <button class="btn btn-primary" id="detailEditBtn">수정</button>
     </div>
@@ -806,6 +807,12 @@ window.openDetail = (id) => {
 
   document.getElementById('detailDesc').textContent = c.description || '';
   document.getElementById('detailEditBtn').onclick = () => openEditModal(id);
+  document.getElementById('detailDeleteBtn').onclick = async () => {
+    if (!confirm(`"${c.title}" 카드를 삭제할까요?`)) return;
+    await deleteDoc(doc(db, 'cards', id));
+    closeDetailModal();
+    showToast('삭제했습니다');
+  };
   document.getElementById('detailModal').classList.remove('hidden');
 };
 
