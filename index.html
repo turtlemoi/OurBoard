@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>개발 트래커</title>
+  <style>
+    :root {
+      --bg: #f1f2f4;
+      --card-bg: #ffffff;
+      --border: #e2e4e9;
+      --text: #1d2125;
+      --text-muted: #626f86;
+      --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+      --shadow-drag: 0 8px 24px rgba(0,0,0,0.15);
+      --radius: 8px;
+      --col-width: 260px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      font-size: 14px;
+    }
+
+    /* ─── Header ─── */
+    .header {
+      padding: 24px 24px 0;
+      background: var(--bg);
+    }
+    .header-top {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 6px;
+    }
+    .board-icon {
+      width: 36px; height: 36px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #f97316, #ef4444);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+    h1 { font-size: 22px; font-weight: 700; }
+    .subtitle { color: var(--text-muted); font-size: 13px; margin-bottom: 14px; }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .btn {
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 12px; border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      cursor: pointer; font-size: 13px; color: var(--text);
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+    .btn:hover { background: #f0f1f3; }
+    .btn.active {
+      background: #e8eaf0;
+      border-color: #b0b8cc;
+      font-weight: 600;
+    }
+    .btn-primary {
+      background: #0c66e4; color: white; border: none;
+    }
+    .btn-primary:hover { background: #0550bf; }
+    .divider { width: 1px; height: 24px; background: var(--border); }
+    .user-chip {
+      display: flex; align-items: center; gap: 6px;
+      padding: 4px 10px; border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--card-bg);
+      cursor: pointer; font-size: 13px;
+    }
+    .user-chip:hover { background: #f0f1f3; }
+    .avatar {
+      width: 22px; height: 22px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 700; color: white;
+      flex-shrink: 0;
+    }
+
+    /* ─── Board ─── */
+    .board {
+      display: flex;
+      gap: 12px;
+      padding: 16px 24px 24px;
+      overflow-x: auto;
+      min-height: calc(100vh - 120px);
+      align-items: flex-start;
+    }
+    .board::-webkit-scrollbar { height: 8px; }
+    .board::-webkit-scrollbar-track { background: transparent; }
+    .board::-webkit-scrollbar-thumb { background: #c0c4cf; border-radius: 4px; }
+
+    /* ─── Column ─── */
+    .column {
+      width: var(--col-width);
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      max-height: calc(100vh - 140px);
+    }
+    .col-header {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 4px 10px;
+    }
+    .col-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .col-name { font-weight: 600; font-size: 13px; }
+    .col-count {
+      background: #dfe1e6; color: var(--text-muted);
+      border-radius: 10px; padding: 1px 7px; font-size: 11px; font-weight: 600;
+      margin-left: auto;
+    }
+    .col-cards {
+      flex: 1;
+      overflow-y: auto;
+      padding: 2px 2px 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-height: 40px;
+    }
+    .col-cards::-webkit-scrollbar { width: 4px; }
+    .col-cards::-webkit-scrollbar-thumb { background: #c0c4cf; border-radius: 4px; }
+    .col-cards.drag-over {
+      background: rgba(9, 91, 211, 0.06);
+      border-radius: var(--radius);
+      outline: 2px dashed #0c66e4;
+    }
+    .add-btn {
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 4px; margin-top: 4px;
+      color: var(--text-muted); cursor: pointer;
+      border-radius: var(--radius); font-size: 13px;
+      transition: background 0.15s, color 0.15s;
+      border: none; background: none; width: 100%; text-align: left;
+    }
+    .add-btn:hover { background: rgba(0,0,0,0.05); color: var(--text); }
+    .add-btn span { font-size: 16px; line-height: 1; }
+
+    /* ─── Card ─── */
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      box-shadow: var(--shadow);
+      cursor: grab;
+      transition: box-shadow 0.15s, transform 0.15s;
+      border: 1px solid transparent;
+      user-select: none;
+    }
+    .card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+      border-color: #b0b8cc;
+    }
+    .card.dragging {
+      opacity: 0.5;
+      box-shadow: var(--shadow-drag);
+      cursor: grabbing;
+    }
+    .card-top {
+      display: flex; align-items: flex-start; gap: 8px;
+    }
+    .card-icon { font-size: 16px; line-height: 1.4; flex-shrink: 0; }
+    .card-title { font-size: 13px; line-height: 1.5; word-break: keep-all; flex: 1; }
+    .card-cat {
+      font-weight: 600;
+      margin-right: 2px;
+    }
+    .card-footer {
+      display: flex; align-items: center; justify-content: flex-end;
+      margin-top: 8px;
+    }
+    .assignee-chip {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 12px; color: var(--text-muted);
+    }
+
+    /* Category colors */
+    .cat-skill { color: #0052cc; }
+    .cat-attack { color: #c9372c; }
+    .cat-motion { color: #0055cc; }
+    .cat-bg { color: #6b4fa0; }
+    .cat-system { color: #626f86; }
+    .cat-effect { color: #007a5a; }
+    .cat-balance { color: #e25c00; }
+    .cat-bug { color: #c9372c; }
+    .cat-other { color: #626f86; }
+
+    /* ─── Modal ─── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 100;
+      backdrop-filter: blur(2px);
+    }
+    .modal-overlay.hidden { display: none; }
+    .modal {
+      background: white; border-radius: 12px;
+      padding: 24px; width: 480px; max-width: 95vw;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+      max-height: 90vh; overflow-y: auto;
+    }
+    .modal h2 { font-size: 17px; font-weight: 700; margin-bottom: 18px; }
+    .form-group { margin-bottom: 14px; }
+    .form-group label {
+      display: block; font-size: 12px; font-weight: 600;
+      color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%; padding: 8px 10px;
+      border: 1.5px solid var(--border); border-radius: 6px;
+      font-size: 14px; font-family: inherit;
+      transition: border-color 0.15s;
+      background: white; color: var(--text);
+    }
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      outline: none; border-color: #0c66e4;
+    }
+    .form-group textarea { resize: vertical; min-height: 80px; }
+    .icon-grid {
+      display: flex; flex-wrap: wrap; gap: 6px;
+    }
+    .icon-opt {
+      width: 36px; height: 36px; border-radius: 6px;
+      border: 1.5px solid var(--border);
+      background: #f8f9fa;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; cursor: pointer; transition: all 0.1s;
+    }
+    .icon-opt:hover { border-color: #0c66e4; background: #e8f0fe; }
+    .icon-opt.selected { border-color: #0c66e4; background: #e8f0fe; box-shadow: 0 0 0 2px #0c66e440; }
+    .modal-actions {
+      display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px;
+    }
+    .btn-danger { background: #ffebe9; color: #c9372c; border-color: #ffd2cc; }
+    .btn-danger:hover { background: #ffd2cc; }
+
+    /* Card detail */
+    .card-detail-header {
+      display: flex; align-items: flex-start; gap: 10px; margin-bottom: 16px;
+    }
+    .card-detail-icon { font-size: 28px; }
+    .card-detail-title-wrap { flex: 1; }
+    .card-detail-cat { font-size: 12px; color: var(--text-muted); margin-bottom: 3px; }
+    .card-detail-title { font-size: 18px; font-weight: 700; }
+    .detail-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 8px 0; border-bottom: 1px solid #f1f2f4; font-size: 13px;
+    }
+    .detail-row .label { color: var(--text-muted); width: 70px; flex-shrink: 0; font-size: 12px; }
+    .detail-desc { margin-top: 12px; font-size: 13px; color: var(--text-muted); line-height: 1.6; white-space: pre-wrap; }
+    .status-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600;
+    }
+
+    /* User setup modal */
+    .user-cards {
+      display: flex; flex-direction: column; gap: 8px; margin-top: 8px;
+    }
+    .user-card {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 14px; border-radius: 8px; border: 2px solid var(--border);
+      cursor: pointer; transition: all 0.15s;
+    }
+    .user-card:hover { border-color: #0c66e4; background: #f0f5ff; }
+    .user-card.selected { border-color: #0c66e4; background: #e8f0fe; }
+    .user-card .name { font-weight: 600; }
+    .user-card .role { font-size: 12px; color: var(--text-muted); }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center; padding: 20px 10px; color: var(--text-muted); font-size: 12px;
+    }
+
+    /* Loading */
+    .loading {
+      position: fixed; inset: 0; background: rgba(255,255,255,0.9);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      z-index: 999; gap: 12px;
+    }
+    .loading.hidden { display: none; }
+    .spinner {
+      width: 32px; height: 32px; border: 3px solid #e2e4e9;
+      border-top-color: #0c66e4; border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: #1d2125; color: white; padding: 10px 18px; border-radius: 8px;
+      font-size: 13px; z-index: 200; opacity: 0; transition: opacity 0.2s;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; }
+  </style>
+</head>
+<body>
+
+<!-- Loading -->
+<div class="loading" id="loading">
+  <div class="spinner"></div>
+  <div style="color:#626f86;font-size:14px">Firebase에 연결 중...</div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Header -->
+<div class="header">
+  <div class="header-top">
+    <div class="board-icon">🎮</div>
+    <h1>개발 트래커</h1>
+  </div>
+  <div class="subtitle">새로운 기능 요청을 추적하고 배정하세요.</div>
+  <div class="header-actions">
+    <button class="btn active" id="filterAll" onclick="setFilter('all')">
+      ➤ 상태별
+    </button>
+    <button class="btn" id="filterMine" onclick="setFilter('mine')">
+      👤 나에게 배정된 작업
+    </button>
+    <div class="divider"></div>
+    <div class="user-chip" onclick="openUserModal()" title="현재 사용자 변경">
+      <div class="avatar" id="headerAvatar" style="background:#0c66e4">?</div>
+      <span id="headerName">사용자 설정</span>
+    </div>
+    <button class="btn btn-primary" onclick="openAddModal(null)">
+      + 새 카드
+    </button>
+  </div>
+</div>
+
+<!-- Board -->
+<div class="board" id="board"></div>
+
+<!-- ═══ Add/Edit Card Modal ═══ -->
+<div class="modal-overlay hidden" id="cardModal">
+  <div class="modal">
+    <h2 id="modalTitle">새 요청 추가</h2>
+
+    <div class="form-group">
+      <label>아이콘</label>
+      <div class="icon-grid" id="iconGrid"></div>
+    </div>
+
+    <div class="form-group">
+      <label>카테고리</label>
+      <select id="cardCategory">
+        <option value="">(없음)</option>
+        <option value="[스킬]">[스킬]</option>
+        <option value="[공격 형태]">[공격 형태]</option>
+        <option value="[모션]">[모션]</option>
+        <option value="[배경]">[배경]</option>
+        <option value="[시스템]">[시스템]</option>
+        <option value="[연출]">[연출]</option>
+        <option value="[밸런스]">[밸런스]</option>
+        <option value="[버그]">[버그]</option>
+        <option value="[기타]">[기타]</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>제목 *</label>
+      <input type="text" id="cardTitle" placeholder="작업 내용을 입력하세요" />
+    </div>
+
+    <div class="form-group">
+      <label>설명</label>
+      <textarea id="cardDesc" placeholder="자세한 내용을 입력하세요 (선택)"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>담당자</label>
+      <select id="cardAssignee">
+        <option value="">없음</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>상태</label>
+      <select id="cardStatus">
+        <option value="신규">신규</option>
+        <option value="검토 중">검토 중</option>
+        <option value="계획됨">계획됨</option>
+        <option value="개발 중">개발 중</option>
+        <option value="반영됨">반영됨</option>
+        <option value="거부됨">거부됨</option>
+      </select>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-danger hidden" id="deleteBtn" onclick="deleteCard()">삭제</button>
+      <button class="btn" onclick="closeCardModal()">취소</button>
+      <button class="btn btn-primary" onclick="saveCard()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Card Detail Modal ═══ -->
+<div class="modal-overlay hidden" id="detailModal">
+  <div class="modal">
+    <div class="card-detail-header">
+      <div class="card-detail-icon" id="detailIcon"></div>
+      <div class="card-detail-title-wrap">
+        <div class="card-detail-cat" id="detailCat"></div>
+        <div class="card-detail-title" id="detailTitle"></div>
+      </div>
+    </div>
+    <div class="detail-row">
+      <span class="label">상태</span>
+      <span class="status-badge" id="detailStatus"></span>
+    </div>
+    <div class="detail-row">
+      <span class="label">담당자</span>
+      <div id="detailAssignee" style="display:flex;align-items:center;gap:6px;font-size:13px"></div>
+    </div>
+    <div class="detail-desc" id="detailDesc"></div>
+    <div class="modal-actions">
+      <button class="btn" onclick="closeDetailModal()">닫기</button>
+      <button class="btn btn-primary" id="detailEditBtn">수정</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ User Setup Modal ═══ -->
+<div class="modal-overlay hidden" id="userModal">
+  <div class="modal" style="width:360px">
+    <h2>사용자 선택</h2>
+    <p style="font-size:13px;color:#626f86;margin-bottom:12px">"나에게 배정된 작업" 필터에 사용됩니다.</p>
+    <div class="user-cards" id="userCards"></div>
+    <div class="modal-actions" style="margin-top:16px">
+      <button class="btn" onclick="closeUserModal()">닫기</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Firebase Config Setup ═══ -->
+<div class="modal-overlay hidden" id="setupModal">
+  <div class="modal" style="width:520px">
+    <h2>🔧 Firebase 설정</h2>
+    <p style="font-size:13px;color:#626f86;margin-bottom:16px;line-height:1.7">
+      Firebase Console에서 프로젝트를 만들고 웹 앱 설정의 <strong>firebaseConfig</strong> 객체 내용을 아래에 붙여넣으세요.<br>
+      <a href="#" onclick="openFirebaseGuide()" style="color:#0c66e4">설정 방법 보기</a>
+    </p>
+    <div class="form-group">
+      <label>Firebase Config (JSON)</label>
+      <textarea id="firebaseConfigInput" style="font-family:monospace;font-size:12px;min-height:160px"
+        placeholder='{
+  "apiKey": "...",
+  "authDomain": "...",
+  "projectId": "...",
+  "storageBucket": "...",
+  "messagingSenderId": "...",
+  "appId": "..."
+}'></textarea>
+    </div>
+    <div id="setupError" style="color:#c9372c;font-size:13px;margin-top:-8px;margin-bottom:8px;display:none"></div>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="saveFirebaseConfig()">연결하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase Guide -->
+<div class="modal-overlay hidden" id="guideModal">
+  <div class="modal" style="width:560px">
+    <h2>Firebase 설정 방법</h2>
+    <ol style="font-size:13px;line-height:2;color:#333;padding-left:18px">
+      <li><a href="https://console.firebase.google.com" target="_blank" style="color:#0c66e4">console.firebase.google.com</a> 접속</li>
+      <li>프로젝트 만들기 클릭 → 프로젝트 이름 입력 (예: ourboard)</li>
+      <li>Google Analytics는 사용 안해도 됨 → 프로젝트 만들기</li>
+      <li>왼쪽 메뉴 "빌드" → <strong>Firestore Database</strong> 클릭</li>
+      <li>데이터베이스 만들기 → <strong>테스트 모드</strong> 선택 → 위치 선택 → 완료</li>
+      <li>왼쪽 메뉴 "프로젝트 설정" (톱니바퀴 아이콘)</li>
+      <li>하단 "내 앱" → <strong>&lt;/&gt; (웹)</strong> 아이콘 클릭</li>
+      <li>앱 닉네임 입력 → 앱 등록</li>
+      <li><strong>firebaseConfig</strong> 객체 내용 복사</li>
+      <li>이전 화면으로 돌아와 붙여넣기</li>
+    </ol>
+    <div class="modal-actions">
+      <button class="btn btn-primary" onclick="document.getElementById('guideModal').classList.add('hidden')">확인</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+// ════════════════════════════════════════════
+//  CONFIGURATION
+// ════════════════════════════════════════════
+
+// Firebase config
+const HARDCODED_CONFIG = {
+  apiKey: "AIzaSyAuDAaKoiiX6U6pAhsnXo-r9nasJDuXd_M",
+  authDomain: "ourboard-db9b6.firebaseapp.com",
+  projectId: "ourboard-db9b6",
+  storageBucket: "ourboard-db9b6.firebasestorage.app",
+  messagingSenderId: "271731984850",
+  appId: "1:271731984850:web:6203c66fab035c91b3600b",
+  measurementId: "G-4CZPRKE14V"
+};
+
+// 팀원 목록 (이름과 아바타 색상)
+const MEMBERS = [
+  { name: '남남', color: '#0c66e4', initial: '남' },
+  { name: 'seungchul lee', color: '#e25c00', initial: 'S' },
+];
+
+// ════════════════════════════════════════════
+//  COLUMN DEFINITIONS
+// ════════════════════════════════════════════
+const COLUMNS = [
+  { id: '신규',    label: '신규',    color: '#2da44e' },
+  { id: '검토 중', label: '검토 중', color: '#f5a623' },
+  { id: '계획됨',  label: '계획됨',  color: '#f5a623' },
+  { id: '개발 중', label: '개발 중', color: '#0c66e4' },
+  { id: '반영됨',  label: '반영됨',  color: '#52c41a' },
+  { id: '거부됨',  label: '거부됨',  color: '#ff4d4f' },
+];
+
+const ICONS = ['🗡️','🛡️','🔥','⚡','🌊','❄️','🌿','💥','✨','🎯','🔧','⚙️','🎮','👾','🐉','🦅','🌙','☀️','💎','🏆','📌','🔔','⚠️','🐛','🎨','🎵','🗺️','📦','🔍','💡'];
+
+const CAT_COLORS = {
+  '[스킬]':    'cat-skill',
+  '[공격 형태]': 'cat-attack',
+  '[모션]':    'cat-motion',
+  '[배경]':    'cat-bg',
+  '[시스템]':  'cat-system',
+  '[연출]':    'cat-effect',
+  '[밸런스]':  'cat-balance',
+  '[버그]':    'cat-bug',
+};
+
+const STATUS_COLORS = {
+  '신규':    { bg:'#e3fcef', color:'#006644' },
+  '검토 중': { bg:'#fff7d6', color:'#7f5f01' },
+  '계획됨':  { bg:'#fff0d6', color:'#a54800' },
+  '개발 중': { bg:'#e9f2ff', color:'#0055cc' },
+  '반영됨':  { bg:'#f3fff3', color:'#216e39' },
+  '거부됨':  { bg:'#ffebe9', color:'#c9372c' },
+};
+
+// ════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════
+let db = null;
+let cards = [];
+let currentFilter = 'all';
+let currentUser = localStorage.getItem('currentUser') || '';
+let editingCardId = null;
+let selectedIcon = '🎯';
+let dragCardId = null;
+let unsubscribe = null;
+
+// ════════════════════════════════════════════
+//  FIREBASE INIT
+// ════════════════════════════════════════════
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc,
+         onSnapshot, query, orderBy, serverTimestamp }
+  from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+async function initFirebase(config) {
+  try {
+    const app = initializeApp(config);
+    db = getFirestore(app);
+    startListener();
+    hideLoading();
+  } catch (e) {
+    hideLoading();
+    showSetupError('연결 실패: ' + e.message);
+  }
+}
+
+function startListener() {
+  if (unsubscribe) unsubscribe();
+  const q = query(collection(db, 'cards'), orderBy('createdAt', 'asc'));
+  unsubscribe = onSnapshot(q, snap => {
+    cards = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderBoard();
+  }, err => {
+    showToast('동기화 오류: ' + err.message);
+  });
+}
+
+// ════════════════════════════════════════════
+//  RENDER
+// ════════════════════════════════════════════
+function renderBoard() {
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+
+  COLUMNS.forEach(col => {
+    let colCards = cards.filter(c => c.status === col.id);
+    if (currentFilter === 'mine' && currentUser) {
+      colCards = colCards.filter(c => c.assignee === currentUser);
+    }
+
+    const colEl = document.createElement('div');
+    colEl.className = 'column';
+    colEl.innerHTML = `
+      <div class="col-header">
+        <div class="col-dot" style="background:${col.color}"></div>
+        <span class="col-name">${col.label}</span>
+        <span class="col-count">${colCards.length}</span>
+      </div>
+      <div class="col-cards" id="col-${col.id}"
+        ondragover="window._dragOver(event,'${col.id}')"
+        ondragleave="window._dragLeave(event)"
+        ondrop="window._drop(event,'${col.id}')">
+        ${colCards.length === 0
+          ? '<div class="empty-state">카드 없음</div>'
+          : colCards.map(c => renderCard(c)).join('')}
+      </div>
+      <button class="add-btn" onclick="window.openAddModal('${col.id}')">
+        <span>+</span> 신규 요청
+      </button>
+    `;
+    board.appendChild(colEl);
+  });
+}
+
+function renderCard(c) {
+  const catClass = CAT_COLORS[c.category] || 'cat-other';
+  const member = MEMBERS.find(m => m.name === c.assignee);
+  const avatarHtml = member
+    ? `<div class="assignee-chip">
+        <div class="avatar" style="background:${member.color}">${member.initial}</div>
+        <span>${member.name}</span>
+       </div>`
+    : '';
+
+  return `<div class="card" id="card-${c.id}"
+    draggable="true"
+    ondragstart="window._dragStart(event,'${c.id}')"
+    ondragend="window._dragEnd(event)"
+    onclick="window.openDetail('${c.id}')">
+    <div class="card-top">
+      <div class="card-icon">${c.icon || '📌'}</div>
+      <div class="card-title">
+        ${c.category ? `<span class="card-cat ${catClass}">${c.category}</span>` : ''}
+        ${escHtml(c.title)}
+      </div>
+    </div>
+    ${avatarHtml ? `<div class="card-footer">${avatarHtml}</div>` : ''}
+  </div>`;
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ════════════════════════════════════════════
+//  DRAG & DROP
+// ════════════════════════════════════════════
+window._dragStart = (e, id) => {
+  dragCardId = id;
+  setTimeout(() => document.getElementById('card-' + id)?.classList.add('dragging'), 0);
+};
+window._dragEnd = (e) => {
+  document.querySelectorAll('.card.dragging').forEach(el => el.classList.remove('dragging'));
+  document.querySelectorAll('.col-cards.drag-over').forEach(el => el.classList.remove('drag-over'));
+};
+window._dragOver = (e, colId) => {
+  e.preventDefault();
+  document.getElementById('col-' + colId)?.classList.add('drag-over');
+};
+window._dragLeave = (e) => {
+  e.currentTarget.classList.remove('drag-over');
+};
+window._drop = async (e, colId) => {
+  e.preventDefault();
+  document.querySelectorAll('.col-cards.drag-over').forEach(el => el.classList.remove('drag-over'));
+  if (!dragCardId || !db) return;
+  const card = cards.find(c => c.id === dragCardId);
+  if (card && card.status !== colId) {
+    await updateDoc(doc(db, 'cards', dragCardId), { status: colId });
+    showToast(`"${colId}" 으로 이동했습니다`);
+  }
+  dragCardId = null;
+};
+
+// ════════════════════════════════════════════
+//  ADD / EDIT MODAL
+// ════════════════════════════════════════════
+window.openAddModal = (statusId) => {
+  if (!db) { showToast('Firebase 연결 후 사용 가능합니다'); return; }
+  editingCardId = null;
+  document.getElementById('modalTitle').textContent = '새 요청 추가';
+  document.getElementById('cardTitle').value = '';
+  document.getElementById('cardDesc').value = '';
+  document.getElementById('cardCategory').value = '';
+  document.getElementById('cardAssignee').value = '';
+  document.getElementById('cardStatus').value = statusId || '신규';
+  document.getElementById('deleteBtn').classList.add('hidden');
+  selectedIcon = '🎯';
+  buildIconGrid();
+  buildAssigneeSelect();
+  document.getElementById('cardModal').classList.remove('hidden');
+  setTimeout(() => document.getElementById('cardTitle').focus(), 100);
+};
+
+window.openEditModal = (id) => {
+  const c = cards.find(x => x.id === id);
+  if (!c) return;
+  editingCardId = id;
+  document.getElementById('modalTitle').textContent = '카드 수정';
+  document.getElementById('cardTitle').value = c.title;
+  document.getElementById('cardDesc').value = c.description || '';
+  document.getElementById('cardCategory').value = c.category || '';
+  document.getElementById('cardStatus').value = c.status;
+  document.getElementById('deleteBtn').classList.remove('hidden');
+  selectedIcon = c.icon || '🎯';
+  buildIconGrid();
+  buildAssigneeSelect(c.assignee);
+  document.getElementById('detailModal').classList.add('hidden');
+  document.getElementById('cardModal').classList.remove('hidden');
+};
+
+window.closeCardModal = () => {
+  document.getElementById('cardModal').classList.add('hidden');
+  editingCardId = null;
+};
+
+window.saveCard = async () => {
+  if (!db) return;
+  const title = document.getElementById('cardTitle').value.trim();
+  if (!title) { document.getElementById('cardTitle').focus(); return; }
+
+  const data = {
+    title,
+    description: document.getElementById('cardDesc').value.trim(),
+    category: document.getElementById('cardCategory').value,
+    assignee: document.getElementById('cardAssignee').value,
+    status: document.getElementById('cardStatus').value,
+    icon: selectedIcon,
+  };
+
+  try {
+    if (editingCardId) {
+      await updateDoc(doc(db, 'cards', editingCardId), data);
+      showToast('저장했습니다');
+    } else {
+      data.createdAt = serverTimestamp();
+      await addDoc(collection(db, 'cards'), data);
+      showToast('추가했습니다');
+    }
+    closeCardModal();
+  } catch (e) {
+    showToast('오류: ' + e.message);
+  }
+};
+
+window.deleteCard = async () => {
+  if (!editingCardId || !db) return;
+  if (!confirm('이 카드를 삭제할까요?')) return;
+  await deleteDoc(doc(db, 'cards', editingCardId));
+  closeCardModal();
+  showToast('삭제했습니다');
+};
+
+// ════════════════════════════════════════════
+//  DETAIL MODAL
+// ════════════════════════════════════════════
+window.openDetail = (id) => {
+  const c = cards.find(x => x.id === id);
+  if (!c) return;
+  document.getElementById('detailIcon').textContent = c.icon || '📌';
+  document.getElementById('detailCat').textContent = c.category || '';
+  document.getElementById('detailTitle').textContent = c.title;
+
+  const sc = STATUS_COLORS[c.status] || { bg:'#f1f2f4', color:'#333' };
+  document.getElementById('detailStatus').textContent = c.status;
+  document.getElementById('detailStatus').style.cssText = `background:${sc.bg};color:${sc.color}`;
+
+  const member = MEMBERS.find(m => m.name === c.assignee);
+  const el = document.getElementById('detailAssignee');
+  if (member) {
+    el.innerHTML = `<div class="avatar" style="background:${member.color}">${member.initial}</div><span>${member.name}</span>`;
+  } else {
+    el.textContent = '없음';
+  }
+
+  document.getElementById('detailDesc').textContent = c.description || '';
+  document.getElementById('detailEditBtn').onclick = () => openEditModal(id);
+  document.getElementById('detailModal').classList.remove('hidden');
+};
+
+window.closeDetailModal = () => {
+  document.getElementById('detailModal').classList.add('hidden');
+};
+
+// ════════════════════════════════════════════
+//  USER / FILTER
+// ════════════════════════════════════════════
+window.setFilter = (f) => {
+  currentFilter = f;
+  document.getElementById('filterAll').classList.toggle('active', f === 'all');
+  document.getElementById('filterMine').classList.toggle('active', f === 'mine');
+  renderBoard();
+};
+
+window.openUserModal = () => {
+  const container = document.getElementById('userCards');
+  container.innerHTML = MEMBERS.map(m => `
+    <div class="user-card ${currentUser === m.name ? 'selected' : ''}"
+      onclick="window.selectUser('${m.name}')">
+      <div class="avatar" style="background:${m.color};width:36px;height:36px;font-size:14px">${m.initial}</div>
+      <div>
+        <div class="name">${m.name}</div>
+      </div>
+    </div>
+  `).join('');
+  document.getElementById('userModal').classList.remove('hidden');
+};
+
+window.closeUserModal = () => {
+  document.getElementById('userModal').classList.add('hidden');
+};
+
+window.selectUser = (name) => {
+  currentUser = name;
+  localStorage.setItem('currentUser', name);
+  updateHeaderUser();
+  closeUserModal();
+  renderBoard();
+};
+
+function updateHeaderUser() {
+  const member = MEMBERS.find(m => m.name === currentUser);
+  if (member) {
+    document.getElementById('headerAvatar').textContent = member.initial;
+    document.getElementById('headerAvatar').style.background = member.color;
+    document.getElementById('headerName').textContent = member.name;
+  }
+}
+
+// ════════════════════════════════════════════
+//  HELPERS
+// ════════════════════════════════════════════
+function buildIconGrid() {
+  const grid = document.getElementById('iconGrid');
+  grid.innerHTML = ICONS.map(ic => `
+    <div class="icon-opt ${ic === selectedIcon ? 'selected' : ''}"
+      onclick="window.selectIcon('${ic}', this)">${ic}</div>
+  `).join('');
+}
+
+window.selectIcon = (ic, el) => {
+  selectedIcon = ic;
+  document.querySelectorAll('.icon-opt').forEach(e => e.classList.remove('selected'));
+  el.classList.add('selected');
+};
+
+function buildAssigneeSelect(selected = '') {
+  const sel = document.getElementById('cardAssignee');
+  sel.innerHTML = '<option value="">없음</option>' +
+    MEMBERS.map(m => `<option value="${m.name}" ${selected === m.name ? 'selected' : ''}>${m.name}</option>`).join('');
+}
+
+function hideLoading() {
+  document.getElementById('loading').classList.add('hidden');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ════════════════════════════════════════════
+//  FIREBASE SETUP MODAL
+// ════════════════════════════════════════════
+window.openFirebaseGuide = () => {
+  document.getElementById('guideModal').classList.remove('hidden');
+};
+
+window.saveFirebaseConfig = () => {
+  const raw = document.getElementById('firebaseConfigInput').value.trim();
+  let config;
+  try {
+    // Strip "const firebaseConfig = " wrapper if pasted from Firebase console
+    const cleaned = raw.replace(/^[\s\S]*?(\{)/, '$1').replace(/\}[\s\S]*$/, '}');
+    config = JSON.parse(cleaned);
+  } catch (e) {
+    showSetupError('JSON 형식이 올바르지 않습니다. 중괄호 { } 안의 내용만 붙여넣으세요.');
+    return;
+  }
+  if (!config.projectId) {
+    showSetupError('projectId가 없습니다. Firebase config를 확인하세요.');
+    return;
+  }
+  localStorage.setItem('firebaseConfig', JSON.stringify(config));
+  document.getElementById('setupModal').classList.add('hidden');
+  document.getElementById('loading').classList.remove('hidden');
+  initFirebase(config);
+};
+
+function showSetupError(msg) {
+  const el = document.getElementById('setupError');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+// ════════════════════════════════════════════
+//  KEYBOARD
+// ════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.getElementById('cardModal').classList.add('hidden');
+    document.getElementById('detailModal').classList.add('hidden');
+    document.getElementById('userModal').classList.add('hidden');
+    document.getElementById('guideModal').classList.add('hidden');
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    if (!document.getElementById('cardModal').classList.contains('hidden')) {
+      saveCard();
+    }
+  }
+});
+
+// Click outside modal closes it
+['cardModal','detailModal','userModal','guideModal'].forEach(id => {
+  document.getElementById(id).addEventListener('click', function(e) {
+    if (e.target === this) this.classList.add('hidden');
+  });
+});
+
+// ════════════════════════════════════════════
+//  BOOT
+// ════════════════════════════════════════════
+(function boot() {
+  if (currentUser) updateHeaderUser();
+
+  const config = HARDCODED_CONFIG || (() => {
+    try { return JSON.parse(localStorage.getItem('firebaseConfig')); } catch { return null; }
+  })();
+
+  if (config && config.projectId) {
+    initFirebase(config);
+  } else {
+    hideLoading();
+    document.getElementById('setupModal').classList.remove('hidden');
+  }
+})();
+</script>
+</body>
+</html>
