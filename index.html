@@ -236,6 +236,10 @@
       box-shadow: var(--shadow-drag);
       cursor: grabbing;
     }
+    .card.selected {
+      border-color: #0c66e4;
+      box-shadow: 0 0 0 2px #0c66e430;
+    }
     .card-top {
       display: flex; align-items: flex-start; gap: 8px;
     }
@@ -319,20 +323,147 @@
     .btn-danger { background: #ffebe9; color: #c9372c; border-color: #ffd2cc; }
     .btn-danger:hover { background: #ffd2cc; }
 
-    /* Card detail */
-    .card-detail-header {
-      display: flex; align-items: flex-start; gap: 10px; margin-bottom: 16px;
+    /* ─── App body layout ─── */
+    .app-body {
+      display: flex;
+      height: calc(100vh - 108px);
+      overflow: hidden;
     }
-    .card-detail-icon { font-size: 28px; }
-    .card-detail-title-wrap { flex: 1; }
-    .card-detail-cat { font-size: 12px; color: var(--text-muted); margin-bottom: 3px; }
-    .card-detail-title { font-size: 18px; font-weight: 700; }
-    .detail-row {
-      display: flex; align-items: center; gap: 12px;
-      padding: 8px 0; border-bottom: 1px solid #f1f2f4; font-size: 13px;
+    .board-wrap {
+      flex: 1;
+      overflow-x: auto;
+      overflow-y: hidden;
+      min-width: 0;
     }
-    .detail-row .label { color: var(--text-muted); width: 70px; flex-shrink: 0; font-size: 12px; }
-    .detail-desc { margin-top: 12px; font-size: 13px; color: var(--text-muted); line-height: 1.6; white-space: pre-wrap; }
+    .board-wrap .board {
+      max-width: none;
+      margin: 0;
+      height: 100%;
+      min-height: unset;
+      align-items: flex-start;
+    }
+
+    /* ─── Side panel ─── */
+    .side-panel {
+      width: 0;
+      flex-shrink: 0;
+      background: white;
+      border-left: 1px solid var(--border);
+      overflow: hidden;
+      transition: width 0.25s cubic-bezier(0.4,0,0.2,1);
+      display: flex;
+      flex-direction: column;
+    }
+    .side-panel.open {
+      width: 480px;
+    }
+    .side-panel-inner {
+      width: 480px;
+      height: 100%;
+      overflow-y: auto;
+      padding: 28px 28px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .side-panel-inner::-webkit-scrollbar { width: 4px; }
+    .side-panel-inner::-webkit-scrollbar-thumb { background: #c0c4cf; border-radius: 4px; }
+
+    .sp-topbar {
+      display: flex; justify-content: flex-end; align-items: center;
+      gap: 6px; margin-bottom: 16px;
+    }
+    .sp-close {
+      width: 28px; height: 28px; border-radius: 5px;
+      border: none; background: none; cursor: pointer;
+      color: var(--text-muted); font-size: 16px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .sp-close:hover { background: #f1f2f4; color: var(--text); }
+
+    .sp-icon {
+      font-size: 36px; line-height: 1; margin-bottom: 10px; cursor: pointer;
+      display: inline-block;
+    }
+    .sp-title {
+      font-size: 22px; font-weight: 700; line-height: 1.3;
+      border: none; outline: none; width: 100%;
+      background: transparent; font-family: inherit; color: var(--text);
+      resize: none; overflow: hidden; margin-bottom: 16px;
+      padding: 2px 4px; border-radius: 4px;
+    }
+    .sp-title:hover { background: #f1f2f4; }
+    .sp-title:focus { background: #f1f2f4; }
+
+    .sp-meta {
+      display: flex; flex-direction: column;
+      border-top: 1px solid #f1f2f4;
+      margin-bottom: 20px;
+    }
+    .sp-meta-row {
+      display: flex; align-items: center;
+      padding: 8px 4px; border-bottom: 1px solid #f1f2f4;
+      gap: 0; font-size: 13px;
+    }
+    .sp-meta-label {
+      width: 80px; flex-shrink: 0;
+      color: var(--text-muted); font-size: 12px;
+      display: flex; align-items: center; gap: 5px;
+    }
+    .sp-meta-value {
+      flex: 1; display: flex; align-items: center; gap: 6px;
+    }
+
+    .sp-status-badge {
+      display: inline-flex; align-items: center;
+      padding: 3px 10px; border-radius: 12px;
+      font-size: 12px; font-weight: 600;
+      cursor: pointer; position: relative;
+    }
+    .sp-assignee-btn {
+      display: flex; align-items: center; gap: 6px;
+      padding: 3px 8px; border-radius: 6px;
+      border: none; background: none; cursor: pointer;
+      font-size: 13px; font-family: inherit;
+    }
+    .sp-assignee-btn:hover { background: #f1f2f4; }
+
+    .sp-section-title {
+      font-size: 13px; font-weight: 700; margin-bottom: 8px; color: var(--text);
+    }
+    .sp-desc {
+      font-size: 13px; line-height: 1.7;
+      border: none; outline: none; width: 100%;
+      background: transparent; font-family: inherit; color: var(--text);
+      resize: none; overflow: hidden; min-height: 60px;
+      padding: 6px 4px; border-radius: 4px;
+    }
+    .sp-desc:hover { background: #f8f9fa; }
+    .sp-desc:focus { background: #f8f9fa; }
+    .sp-desc::placeholder { color: #adb5bd; }
+
+    .sp-footer {
+      margin-top: auto; padding-top: 20px;
+      display: flex; justify-content: flex-end;
+    }
+
+    /* status dropdown in side panel */
+    .status-dropdown {
+      position: fixed; z-index: 200;
+      background: white; border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      border: 1px solid var(--border);
+      padding: 6px; min-width: 150px;
+    }
+    .status-dropdown-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 10px; border-radius: 5px;
+      cursor: pointer; font-size: 13px;
+    }
+    .status-dropdown-item:hover { background: #f0f1f3; }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+    /* Card detail (kept for compatibility - unused) */
     .status-badge {
       display: inline-flex; align-items: center; gap: 5px;
       padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600;
@@ -419,8 +550,71 @@
   </div>
 </div>
 
-<!-- Board -->
-<div class="board" id="board"></div>
+<!-- App body: board + side panel -->
+<div class="app-body">
+  <div class="board-wrap">
+    <div class="board" id="board"></div>
+  </div>
+
+  <!-- ═══ Side Panel ═══ -->
+  <div class="side-panel" id="sidePanel">
+    <div class="side-panel-inner">
+      <div class="sp-topbar">
+        <button class="sp-close btn" onclick="closeSidePanel()" title="닫기">✕</button>
+      </div>
+
+      <div class="sp-icon" id="spIcon" onclick="openIconPickerInPanel()">📌</div>
+      <textarea class="sp-title" id="spTitle" rows="2"
+        placeholder="카드 제목"
+        oninput="autoResizeTextarea(this)"
+        onblur="savePanelField('title', this.value)"></textarea>
+
+      <div class="sp-meta">
+        <div class="sp-meta-row">
+          <div class="sp-meta-label">📋 상태</div>
+          <div class="sp-meta-value">
+            <span class="sp-status-badge" id="spStatusBadge"
+              onclick="toggleStatusDropdown(event)"></span>
+          </div>
+        </div>
+        <div class="sp-meta-row">
+          <div class="sp-meta-label">👤 담당자</div>
+          <div class="sp-meta-value">
+            <button class="sp-assignee-btn" id="spAssigneeBtn"
+              onclick="togglePanelAssigneeDropdown(event)">없음</button>
+          </div>
+        </div>
+        <div class="sp-meta-row">
+          <div class="sp-meta-label">🏷 카테고리</div>
+          <div class="sp-meta-value">
+            <select id="spCategory" onchange="savePanelField('category', this.value)"
+              style="border:none;background:transparent;font-size:13px;cursor:pointer;color:var(--text);font-family:inherit;outline:none;padding:2px 4px;border-radius:4px;">
+              <option value="">(없음)</option>
+              <option value="[스킬]">[스킬]</option>
+              <option value="[공격 형태]">[공격 형태]</option>
+              <option value="[모션]">[모션]</option>
+              <option value="[배경]">[배경]</option>
+              <option value="[시스템]">[시스템]</option>
+              <option value="[연출]">[연출]</option>
+              <option value="[밸런스]">[밸런스]</option>
+              <option value="[버그]">[버그]</option>
+              <option value="[기타]">[기타]</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="sp-section-title">설명</div>
+      <textarea class="sp-desc" id="spDesc" placeholder="자세한 내용을 입력하세요..."
+        oninput="autoResizeTextarea(this)"
+        onblur="savePanelField('description', this.value)"></textarea>
+
+      <div class="sp-footer">
+        <button class="btn btn-danger" id="spDeleteBtn">삭제</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- ═══ Add/Edit Card Modal ═══ -->
 <div class="modal-overlay hidden" id="cardModal">
@@ -485,32 +679,6 @@
   </div>
 </div>
 
-<!-- ═══ Card Detail Modal ═══ -->
-<div class="modal-overlay hidden" id="detailModal">
-  <div class="modal">
-    <div class="card-detail-header">
-      <div class="card-detail-icon" id="detailIcon"></div>
-      <div class="card-detail-title-wrap">
-        <div class="card-detail-cat" id="detailCat"></div>
-        <div class="card-detail-title" id="detailTitle"></div>
-      </div>
-    </div>
-    <div class="detail-row">
-      <span class="label">상태</span>
-      <span class="status-badge" id="detailStatus"></span>
-    </div>
-    <div class="detail-row">
-      <span class="label">담당자</span>
-      <div id="detailAssignee" style="display:flex;align-items:center;gap:6px;font-size:13px"></div>
-    </div>
-    <div class="detail-desc" id="detailDesc"></div>
-    <div class="modal-actions">
-      <button class="btn btn-danger" id="detailDeleteBtn">삭제</button>
-      <button class="btn" onclick="closeDetailModal()">닫기</button>
-      <button class="btn btn-primary" id="detailEditBtn">수정</button>
-    </div>
-  </div>
-</div>
 
 <!-- ═══ User Setup Modal ═══ -->
 <div class="modal-overlay hidden" id="userModal">
@@ -667,6 +835,14 @@ function startListener() {
   unsubscribe = onSnapshot(q, snap => {
     cards = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     renderBoard();
+    // 패널이 열려있으면 해당 카드 최신 데이터로 갱신
+    if (activePanelCardId) {
+      const updated = cards.find(c => c.id === activePanelCardId);
+      if (updated) {
+        updatePanelStatus(updated.status);
+        updatePanelAssignee(updated.assignee);
+      }
+    }
   }, err => {
     showToast('동기화 오류: ' + err.message);
   });
@@ -971,41 +1147,157 @@ window.deleteCard = async () => {
 };
 
 // ════════════════════════════════════════════
-//  DETAIL MODAL
+//  SIDE PANEL
 // ════════════════════════════════════════════
+let activePanelCardId = null;
+
 window.openDetail = (id) => {
   const c = cards.find(x => x.id === id);
   if (!c) return;
-  document.getElementById('detailIcon').textContent = c.icon || '📌';
-  document.getElementById('detailCat').textContent = c.category || '';
-  document.getElementById('detailTitle').textContent = c.title;
+  activePanelCardId = id;
 
-  const sc = STATUS_COLORS[c.status] || { bg:'#f1f2f4', color:'#333' };
-  document.getElementById('detailStatus').textContent = c.status;
-  document.getElementById('detailStatus').style.cssText = `background:${sc.bg};color:${sc.color}`;
+  // icon
+  document.getElementById('spIcon').textContent = c.icon || '📌';
 
-  const member = MEMBERS.find(m => m.name === c.assignee);
-  const el = document.getElementById('detailAssignee');
-  if (member) {
-    el.innerHTML = `<div class="avatar">${member.emoji}</div><span>${member.name}</span>`;
-  } else {
-    el.textContent = '없음';
-  }
+  // title
+  const titleEl = document.getElementById('spTitle');
+  titleEl.value = c.title;
+  autoResizeTextarea(titleEl);
 
-  document.getElementById('detailDesc').textContent = c.description || '';
-  document.getElementById('detailEditBtn').onclick = () => openEditModal(id);
-  document.getElementById('detailDeleteBtn').onclick = async () => {
+  // status badge
+  updatePanelStatus(c.status);
+
+  // assignee
+  updatePanelAssignee(c.assignee);
+
+  // category
+  document.getElementById('spCategory').value = c.category || '';
+
+  // description
+  const descEl = document.getElementById('spDesc');
+  descEl.value = c.description || '';
+  autoResizeTextarea(descEl);
+
+  // delete button
+  document.getElementById('spDeleteBtn').onclick = async () => {
     if (!confirm(`"${c.title}" 카드를 삭제할까요?`)) return;
     await deleteDoc(doc(db, 'cards', id));
-    closeDetailModal();
+    closeSidePanel();
     showToast('삭제했습니다');
   };
-  document.getElementById('detailModal').classList.remove('hidden');
+
+  document.getElementById('sidePanel').classList.add('open');
+
+  // highlight selected card
+  document.querySelectorAll('.card').forEach(el => el.classList.remove('selected'));
+  document.getElementById('card-' + id)?.classList.add('selected');
 };
 
-window.closeDetailModal = () => {
-  document.getElementById('detailModal').classList.add('hidden');
+window.closeSidePanel = () => {
+  document.getElementById('sidePanel').classList.remove('open');
+  document.querySelectorAll('.card').forEach(el => el.classList.remove('selected'));
+  activePanelCardId = null;
 };
+
+// Keep closeDetailModal as alias for Esc key
+window.closeDetailModal = window.closeSidePanel;
+
+function updatePanelStatus(status) {
+  const sc = STATUS_COLORS[status] || { bg:'#f1f2f4', color:'#333' };
+  const badge = document.getElementById('spStatusBadge');
+  badge.textContent = status;
+  badge.style.cssText = `background:${sc.bg};color:${sc.color}`;
+  badge.dataset.status = status;
+}
+
+function updatePanelAssignee(name) {
+  const member = MEMBERS.find(m => m.name === name);
+  const btn = document.getElementById('spAssigneeBtn');
+  if (member) {
+    btn.innerHTML = `<div class="avatar" style="font-size:16px">${member.emoji}</div>${member.name}`;
+  } else {
+    btn.innerHTML = '없음';
+  }
+  btn.dataset.assignee = name || '';
+}
+
+window.savePanelField = async (field, value) => {
+  if (!activePanelCardId || !db) return;
+  try {
+    await updateDoc(doc(db, 'cards', activePanelCardId), { [field]: value });
+  } catch(e) { showToast('저장 오류: ' + e.message); }
+};
+
+window.toggleStatusDropdown = (e) => {
+  e.stopPropagation();
+  const existing = document.getElementById('status-dropdown');
+  if (existing) { existing.remove(); return; }
+  const badge = document.getElementById('spStatusBadge');
+  const rect = badge.getBoundingClientRect();
+  const dropdown = document.createElement('div');
+  dropdown.className = 'status-dropdown';
+  dropdown.id = 'status-dropdown';
+  dropdown.style.top = (rect.bottom + 4) + 'px';
+  dropdown.style.left = rect.left + 'px';
+  dropdown.innerHTML = COLUMNS.map(col => `
+    <div class="status-dropdown-item" onclick="window.selectPanelStatus('${col.id}')">
+      <div class="status-dot" style="background:${col.color}"></div>
+      ${col.label}
+    </div>
+  `).join('');
+  document.body.appendChild(dropdown);
+};
+
+window.selectPanelStatus = async (status) => {
+  document.getElementById('status-dropdown')?.remove();
+  if (!activePanelCardId) return;
+  updatePanelStatus(status);
+  await savePanelField('status', status);
+};
+
+window.togglePanelAssigneeDropdown = (e) => {
+  e.stopPropagation();
+  const existing = document.getElementById('assignee-dropdown');
+  if (existing) { existing.remove(); return; }
+  const btn = document.getElementById('spAssigneeBtn');
+  const rect = btn.getBoundingClientRect();
+  const dropdown = document.createElement('div');
+  dropdown.className = 'assignee-dropdown';
+  dropdown.id = 'assignee-dropdown';
+  dropdown.style.top = (rect.bottom + 4) + 'px';
+  dropdown.style.left = rect.left + 'px';
+  dropdown.innerHTML = `
+    <div class="assignee-dropdown-label">담당자 선택</div>
+    ${MEMBERS.map(m => `
+      <div class="assignee-dropdown-item" onclick="window.selectPanelAssignee('${m.name}')">
+        <div class="avatar" style="font-size:16px">${m.emoji}</div>
+        <span>${m.name}</span>
+      </div>
+    `).join('')}
+    <div class="assignee-dropdown-item" onclick="window.selectPanelAssignee('')">
+      <span style="font-size:15px">✕</span><span style="color:var(--text-muted)">배정 없음</span>
+    </div>
+  `;
+  document.body.appendChild(dropdown);
+};
+
+window.selectPanelAssignee = async (name) => {
+  document.getElementById('assignee-dropdown')?.remove();
+  if (activePanelCardId === null) return;
+  updatePanelAssignee(name);
+  await savePanelField('assignee', name);
+};
+
+window.openIconPickerInPanel = () => {
+  // reuse modal icon picker
+  if (!activePanelCardId) return;
+  openEditModal(activePanelCardId);
+};
+
+function autoResizeTextarea(el) {
+  el.style.height = 'auto';
+  el.style.height = el.scrollHeight + 'px';
+}
 
 // ════════════════════════════════════════════
 //  USER / FILTER
@@ -1126,10 +1418,11 @@ function showSetupError(msg) {
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     document.getElementById('cardModal').classList.add('hidden');
-    document.getElementById('detailModal').classList.add('hidden');
     document.getElementById('userModal').classList.add('hidden');
     document.getElementById('guideModal').classList.add('hidden');
+    document.getElementById('status-dropdown')?.remove();
     COLUMNS.forEach(c => closeInlineForm(c.id));
+    closeSidePanel();
   }
   if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
     if (!document.getElementById('cardModal').classList.contains('hidden')) {
