@@ -1139,7 +1139,6 @@ window.openAddModal = (statusId) => {
   document.getElementById('modalTitle').textContent = '새 요청 추가';
   document.getElementById('cardTitle').value = '';
   document.getElementById('cardDesc').value = '';
-  document.getElementById('cardCategory').value = '';
   document.getElementById('cardAssignee').value = '';
   document.getElementById('cardStatus').value = statusId || '신규';
   document.getElementById('deleteBtn').classList.add('hidden');
@@ -1157,7 +1156,6 @@ window.openEditModal = (id) => {
   document.getElementById('modalTitle').textContent = '카드 수정';
   document.getElementById('cardTitle').value = c.title;
   document.getElementById('cardDesc').value = c.description || '';
-  document.getElementById('cardCategory').value = c.category || '';
   document.getElementById('cardStatus').value = c.status;
   document.getElementById('deleteBtn').classList.remove('hidden');
   selectedIcon = c.icon || '🎯';
@@ -1180,7 +1178,6 @@ window.saveCard = async () => {
   const data = {
     title,
     description: document.getElementById('cardDesc').value.trim(),
-    category: document.getElementById('cardCategory').value,
     assignee: document.getElementById('cardAssignee').value,
     status: document.getElementById('cardStatus').value,
     icon: selectedIcon,
@@ -1232,9 +1229,6 @@ window.openDetail = (id) => {
 
   // assignee
   updatePanelAssignee(c.assignee);
-
-  // category
-  document.getElementById('spCategory').value = c.category || '';
 
   // description
   const descEl = document.getElementById('spDesc');
