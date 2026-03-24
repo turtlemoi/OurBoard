@@ -504,6 +504,48 @@
 
     .hidden { display: none !important; }
 
+    /* ─── Multi-select ─── */
+    #selRect {
+      position: fixed; pointer-events: none; z-index: 60;
+      border: 1.5px solid #0c66e4;
+      background: rgba(12,102,228,0.07);
+      border-radius: 3px;
+    }
+    .card.multi-selected {
+      border-color: #0c66e4 !important;
+      box-shadow: 0 0 0 2px #0c66e450 !important;
+      background: #f0f5ff !important;
+    }
+    .sel-bar {
+      position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+      background: #1d2125; color: white; border-radius: 10px;
+      padding: 10px 16px; display: flex; align-items: center; gap: 10px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25); z-index: 150; white-space: nowrap;
+      font-size: 13px;
+    }
+    .sel-bar.hidden { display: none !important; }
+    .sel-bar-count { font-weight: 700; color: #8cb4ff; margin-right: 4px; }
+    .sel-bar-divider { width: 1px; height: 18px; background: #444; }
+    .sel-bar-label { color: #adb5bd; font-size: 12px; }
+    .sel-move-btn {
+      padding: 4px 10px; border-radius: 6px; border: 1px solid #444;
+      background: transparent; color: white; cursor: pointer; font-size: 12px;
+      display: flex; align-items: center; gap: 5px;
+      transition: background 0.1s;
+    }
+    .sel-move-btn:hover { background: #2d3748; }
+    .sel-del-btn {
+      padding: 4px 10px; border-radius: 6px; border: none;
+      background: #c9372c; color: white; cursor: pointer; font-size: 12px;
+      transition: background 0.1s;
+    }
+    .sel-del-btn:hover { background: #a82820; }
+    .sel-clear-btn {
+      padding: 4px 8px; border-radius: 6px; border: none;
+      background: transparent; color: #adb5bd; cursor: pointer; font-size: 16px; line-height: 1;
+    }
+    .sel-clear-btn:hover { color: white; }
+
     /* Toast */
     .toast {
       position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
@@ -533,13 +575,6 @@
   </div>
   <div class="subtitle">새로운 기능 요청을 추적하고 배정하세요.</div>
   <div class="header-actions">
-    <button class="btn active" id="filterAll" onclick="setFilter('all')">
-      ➤ 상태별
-    </button>
-    <button class="btn" id="filterMine" onclick="setFilter('mine')">
-      👤 나에게 배정된 작업
-    </button>
-    <div class="divider"></div>
     <div class="user-chip" onclick="openUserModal()" title="현재 사용자 변경">
       <div class="avatar" id="headerAvatar">👤</div>
       <span id="headerName">사용자 설정</span>
@@ -548,6 +583,13 @@
       + 새 카드
     </button>
   </div>
+</div>
+
+<!-- Multi-select action bar -->
+<div class="sel-bar hidden" id="selBar">
+  <span class="sel-bar-count" id="selCount">0개</span> 선택됨
+  <div class="sel-bar-divider"></div>
+  <span class="sel-bar-label">이동:</span>
 </div>
 
 <!-- App body: board + side panel -->
@@ -802,12 +844,16 @@ const STATUS_COLORS = {
 // ════════════════════════════════════════════
 let db = null;
 let cards = [];
-let currentFilter = 'all';
 let currentUser = localStorage.getItem('currentUser') || '';
 let editingCardId = null;
 let selectedIcon = '🎯';
 let dragCardId = null;
 let unsubscribe = null;
+
+// Multi-select state
+let multiSelected = new Set();
+let isRubberBanding = false;
+let rbStart = { x: 0, y: 0 };
 
 // ════════════════════════════════════════════
 //  FIREBASE INIT
@@ -856,10 +902,7 @@ function renderBoard() {
   board.innerHTML = '';
 
   COLUMNS.forEach(col => {
-    let colCards = cards.filter(c => c.status === col.id);
-    if (currentFilter === 'mine' && currentUser) {
-      colCards = colCards.filter(c => c.assignee === currentUser);
-    }
+    const colCards = cards.filter(c => c.status === col.id);
 
     const colEl = document.createElement('div');
     colEl.className = 'column';
@@ -1413,6 +1456,136 @@ function showSetupError(msg) {
 }
 
 // ════════════════════════════════════════════
+//  MULTI-SELECT (RUBBER BAND)
+// ════════════════════════════════════════════
+function buildSelBar() {
+  const bar = document.getElementById('selBar');
+  // remove old move buttons
+  bar.querySelectorAll('.sel-move-btn,.sel-del-btn,.sel-clear-btn,.sel-bar-divider2').forEach(e=>e.remove());
+
+  const div = document.createElement('div');
+  div.style.cssText = 'display:flex;align-items:center;gap:6px;flex-wrap:wrap';
+  COLUMNS.forEach(col => {
+    const b = document.createElement('button');
+    b.className = 'sel-move-btn';
+    b.innerHTML = `<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${col.color}"></span>${col.label}`;
+    b.onclick = () => moveSelectedTo(col.id);
+    div.appendChild(b);
+  });
+  bar.appendChild(div);
+
+  const sep = document.createElement('div');
+  sep.className = 'sel-bar-divider sel-bar-divider2';
+  bar.appendChild(sep);
+
+  const delBtn = document.createElement('button');
+  delBtn.className = 'sel-del-btn';
+  delBtn.textContent = '🗑 삭제';
+  delBtn.onclick = deleteSelected;
+  bar.appendChild(delBtn);
+
+  const clrBtn = document.createElement('button');
+  clrBtn.className = 'sel-clear-btn';
+  clrBtn.textContent = '✕';
+  clrBtn.title = '선택 해제';
+  clrBtn.onclick = clearMultiSelect;
+  bar.appendChild(clrBtn);
+}
+
+function updateSelBar() {
+  const bar = document.getElementById('selBar');
+  if (multiSelected.size === 0) {
+    bar.classList.add('hidden');
+    return;
+  }
+  document.getElementById('selCount').textContent = multiSelected.size + '개';
+  bar.classList.remove('hidden');
+}
+
+window.clearMultiSelect = () => {
+  multiSelected.clear();
+  document.querySelectorAll('.card.multi-selected').forEach(el => el.classList.remove('multi-selected'));
+  document.getElementById('selBar').classList.add('hidden');
+};
+
+window.moveSelectedTo = async (colId) => {
+  if (!db || multiSelected.size === 0) return;
+  const promises = [...multiSelected].map(id => updateDoc(doc(db, 'cards', id), { status: colId }));
+  await Promise.all(promises);
+  showToast(`${multiSelected.size}개를 "${colId}"로 이동했습니다`);
+  clearMultiSelect();
+};
+
+window.deleteSelected = async () => {
+  if (!db || multiSelected.size === 0) return;
+  if (!confirm(`선택한 ${multiSelected.size}개의 카드를 삭제할까요?`)) return;
+  const promises = [...multiSelected].map(id => deleteDoc(doc(db, 'cards', id)));
+  await Promise.all(promises);
+  showToast(`${multiSelected.size}개를 삭제했습니다`);
+  clearMultiSelect();
+};
+
+// Rubber-band mouse events
+document.addEventListener('mousedown', e => {
+  // only on board background, not on interactive elements
+  if (e.button !== 0) return;
+  if (e.target.closest('.card,.add-btn,.inline-form,.side-panel,.modal-overlay,.sel-bar,button,select,textarea,input,.col-header')) return;
+  if (!e.target.closest('.board-wrap')) return;
+
+  isRubberBanding = true;
+  rbStart = { x: e.clientX, y: e.clientY };
+
+  const rect = document.createElement('div');
+  rect.id = 'selRect';
+  rect.style.left = e.clientX + 'px';
+  rect.style.top  = e.clientY + 'px';
+  rect.style.width = '0px';
+  rect.style.height = '0px';
+  document.body.appendChild(rect);
+
+  if (!e.shiftKey) clearMultiSelect();
+  e.preventDefault();
+});
+
+document.addEventListener('mousemove', e => {
+  if (!isRubberBanding) return;
+  const rect = document.getElementById('selRect');
+  if (!rect) return;
+
+  const x = Math.min(e.clientX, rbStart.x);
+  const y = Math.min(e.clientY, rbStart.y);
+  const w = Math.abs(e.clientX - rbStart.x);
+  const h = Math.abs(e.clientY - rbStart.y);
+  rect.style.left   = x + 'px';
+  rect.style.top    = y + 'px';
+  rect.style.width  = w + 'px';
+  rect.style.height = h + 'px';
+
+  const rr = { left: x, top: y, right: x + w, bottom: y + h };
+  cards.forEach(c => {
+    const el = document.getElementById('card-' + c.id);
+    if (!el) return;
+    const cr = el.getBoundingClientRect();
+    const hit = cr.right > rr.left && cr.left < rr.right && cr.bottom > rr.top && cr.top < rr.bottom;
+    if (hit) {
+      multiSelected.add(c.id);
+      el.classList.add('multi-selected');
+    } else if (!e.shiftKey) {
+      multiSelected.delete(c.id);
+      el.classList.remove('multi-selected');
+    }
+  });
+  updateSelBar();
+});
+
+document.addEventListener('mouseup', e => {
+  if (!isRubberBanding) return;
+  isRubberBanding = false;
+  document.getElementById('selRect')?.remove();
+  updateSelBar();
+});
+
+// ════════════════════════════════════════════
 //  KEYBOARD
 // ════════════════════════════════════════════
 document.addEventListener('keydown', e => {
@@ -1423,6 +1596,13 @@ document.addEventListener('keydown', e => {
     document.getElementById('status-dropdown')?.remove();
     COLUMNS.forEach(c => closeInlineForm(c.id));
     closeSidePanel();
+    clearMultiSelect();
+  }
+  if ((e.key === 'Delete' || e.key === 'Backspace') && multiSelected.size > 0) {
+    const active = document.activeElement;
+    if (!active || !['INPUT','TEXTAREA','SELECT'].includes(active.tagName)) {
+      deleteSelected();
+    }
   }
   if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
     if (!document.getElementById('cardModal').classList.contains('hidden')) {
@@ -1444,8 +1624,8 @@ document.addEventListener('keydown', e => {
 document.addEventListener('click', () => closeAssigneeDropdown());
 
 // Click outside modal closes it
-['cardModal','detailModal','userModal','guideModal'].forEach(id => {
-  document.getElementById(id).addEventListener('click', function(e) {
+['cardModal','userModal','guideModal'].forEach(id => {
+  document.getElementById(id)?.addEventListener('click', function(e) {
     if (e.target === this) this.classList.add('hidden');
   });
 });
@@ -1454,6 +1634,7 @@ document.addEventListener('click', () => closeAssigneeDropdown());
 //  BOOT
 // ════════════════════════════════════════════
 (function boot() {
+  buildSelBar();
   if (currentUser) updateHeaderUser();
 
   const config = HARDCODED_CONFIG || (() => {
