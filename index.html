@@ -198,7 +198,7 @@
     .inline-assignee.has-assignee { color: var(--text); font-weight: 500; }
 
     .assignee-dropdown {
-      position: absolute; z-index: 50;
+      position: fixed; z-index: 200;
       background: white; border-radius: 8px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.15);
       border: 1px solid var(--border);
@@ -828,9 +828,12 @@ window.toggleAssigneeDropdown = (e, colId) => {
   if (existing) { existing.remove(); return; }
 
   const btn = document.getElementById('inline-assignee-btn-' + colId);
+  const rect = btn.getBoundingClientRect();
   const dropdown = document.createElement('div');
   dropdown.className = 'assignee-dropdown';
   dropdown.id = 'assignee-dropdown';
+  dropdown.style.top = (rect.bottom + 4) + 'px';
+  dropdown.style.left = rect.left + 'px';
   dropdown.innerHTML = `
     <div class="assignee-dropdown-label">원하는 만큼 선택</div>
     ${MEMBERS.map(m => `
@@ -844,9 +847,7 @@ window.toggleAssigneeDropdown = (e, colId) => {
       <span style="font-size:15px">✕</span> <span style="color:var(--text-muted)">배정 없음</span>
     </div>
   `;
-  // 폼 안에 삽입
-  const form = document.getElementById('inline-' + colId);
-  btn.insertAdjacentElement('afterend', dropdown);
+  document.body.appendChild(dropdown);
 };
 
 window.selectInlineAssignee = (e, colId, name) => {
