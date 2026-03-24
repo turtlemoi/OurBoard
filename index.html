@@ -868,7 +868,7 @@ async function initFirebase(config) {
     const app = initializeApp(config);
     db = getFirestore(app);
     startListener();
-    hideLoading();
+    // hideLoading은 startListener의 첫 응답 or timeout에서 처리
   } catch (e) {
     hideLoading();
     showSetupError('연결 실패: ' + e.message);
@@ -878,10 +878,18 @@ async function initFirebase(config) {
 function startListener() {
   if (unsubscribe) unsubscribe();
   const q = query(collection(db, 'cards'), orderBy('createdAt', 'asc'));
+
+  // 10초 안에 응답 없으면 에러 표시
+  const timeout = setTimeout(() => {
+    hideLoading();
+    showToast('연결 시간 초과 — Firebase Console에서 Firestore Database가 생성됐는지 확인하세요');
+  }, 10000);
+
   unsubscribe = onSnapshot(q, snap => {
+    clearTimeout(timeout);
+    hideLoading();
     cards = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     renderBoard();
-    // 패널이 열려있으면 해당 카드 최신 데이터로 갱신
     if (activePanelCardId) {
       const updated = cards.find(c => c.id === activePanelCardId);
       if (updated) {
@@ -890,7 +898,9 @@ function startListener() {
       }
     }
   }, err => {
-    showToast('동기화 오류: ' + err.message);
+    clearTimeout(timeout);
+    hideLoading();
+    showToast('Firestore 오류: ' + err.message + ' — Firebase Console에서 Firestore Database를 만들었는지 확인하세요');
   });
 }
 
