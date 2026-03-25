@@ -593,6 +593,202 @@
     }
     .sel-clear-btn:hover { color: white; }
 
+    /* ─── Calendar View ─── */
+    .cal-view {
+      padding: 0 40px 16px;
+      max-width: 1800px;
+      margin: 0 auto;
+      height: calc(100vh - 108px);
+      display: flex;
+      flex-direction: column;
+    }
+    .cal-topbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 0 10px;
+      flex-shrink: 0;
+    }
+    .cal-month-label {
+      font-size: 20px;
+      font-weight: 700;
+      margin-left: 4px;
+    }
+    .cal-main {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      background: white;
+    }
+    .cal-left {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .cal-weekdays {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .cal-weekday {
+      padding: 8px 0;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .cal-weekday.sun { color: #ef4444; }
+    .cal-weekday.sat { color: #3b82f6; }
+    .cal-weeks {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .cal-week-row {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      border-bottom: 1px solid var(--border);
+    }
+    .cal-week-row:last-child { border-bottom: none; }
+    .cal-cells {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      flex-shrink: 0;
+    }
+    .cal-cell {
+      border-right: 1px solid var(--border);
+      padding: 4px 6px;
+      min-height: 28px;
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .cal-cell:last-child { border-right: none; }
+    .cal-cell.other-month .cal-day-num { color: #c0c4cf; }
+    .cal-cell.sun .cal-day-num { color: #ef4444; }
+    .cal-cell.sat .cal-day-num { color: #3b82f6; }
+    .cal-cell.cal-drag-highlight { background: rgba(59,130,246,0.1); }
+    .cal-day-num {
+      font-size: 12px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+    }
+    .cal-day-num.today {
+      background: #3b82f6;
+      color: white !important;
+      font-weight: 700;
+    }
+    .cal-events-layer {
+      position: relative;
+      width: 100%;
+      flex: 1;
+      overflow: hidden;
+    }
+    .cal-event-bar {
+      position: absolute;
+      height: 18px;
+      border-radius: 3px;
+      color: white;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 1px 6px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      cursor: pointer;
+      z-index: 1;
+      transition: filter 0.1s;
+    }
+    .cal-event-bar:hover { filter: brightness(0.88); }
+
+    /* Memo sidebar */
+    .cal-memo-sidebar {
+      width: 156px;
+      flex-shrink: 0;
+      border-left: 2px solid var(--border);
+      display: flex;
+      flex-direction: column;
+    }
+    .cal-memo-header {
+      padding: 0 10px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      height: 37px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .cal-memo-weeks {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    .cal-memo-week {
+      flex: 1;
+      min-height: 0;
+      border-bottom: 1px solid var(--border);
+      padding: 4px 6px;
+      display: flex;
+      flex-direction: column;
+    }
+    .cal-memo-week:last-child { border-bottom: none; }
+    .cal-memo-week-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+      flex-shrink: 0;
+    }
+    .cal-memo-textarea {
+      flex: 1;
+      min-height: 0;
+      border: none;
+      outline: none;
+      resize: none;
+      font-size: 11px;
+      font-family: inherit;
+      color: var(--text);
+      background: transparent;
+      line-height: 1.5;
+      width: 100%;
+      overflow-y: auto;
+    }
+    .cal-memo-textarea::placeholder { color: #c0c4cf; }
+
+    /* Cal event modal */
+    .cal-color-swatches {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+    .cal-color-swatch {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 3px solid transparent;
+      transition: border-color 0.15s, transform 0.1s;
+    }
+    .cal-color-swatch:hover { transform: scale(1.1); }
+    .cal-color-swatch.selected { border-color: #1d2125; }
+
     /* Toast */
     .toast {
       position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
@@ -626,6 +822,10 @@
       <div class="avatar" id="headerAvatar">👤</div>
       <span id="headerName">사용자 설정</span>
     </div>
+    <div class="divider"></div>
+    <button class="btn active" id="btnBoard" onclick="showBoard()">📋 보드</button>
+    <button class="btn" id="btnCalendar" onclick="showCalendar()">📅 캘린더</button>
+    <div class="divider"></div>
     <button class="btn btn-primary" onclick="openAddModal(null)">
       + 새 카드
     </button>
@@ -640,7 +840,7 @@
 </div>
 
 <!-- App body: board + side panel -->
-<div class="app-body">
+<div class="app-body" id="boardView">
   <div class="board-wrap">
     <div class="board" id="board"></div>
   </div>
@@ -687,6 +887,34 @@
           <button class="btn btn-danger" id="spDeleteBtn">삭제</button>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Calendar View -->
+<div class="cal-view hidden" id="calView">
+  <div class="cal-topbar">
+    <button class="btn" onclick="calToday()">Today</button>
+    <button class="btn" onclick="calPrev()">‹</button>
+    <button class="btn" onclick="calNext()">›</button>
+    <span class="cal-month-label" id="calMonthLabel"></span>
+  </div>
+  <div class="cal-main">
+    <div class="cal-left">
+      <div class="cal-weekdays">
+        <div class="cal-weekday sun">일</div>
+        <div class="cal-weekday">월</div>
+        <div class="cal-weekday">화</div>
+        <div class="cal-weekday">수</div>
+        <div class="cal-weekday">목</div>
+        <div class="cal-weekday">금</div>
+        <div class="cal-weekday sat">토</div>
+      </div>
+      <div class="cal-weeks" id="calWeeks"></div>
+    </div>
+    <div class="cal-memo-sidebar">
+      <div class="cal-memo-header">주간 메모</div>
+      <div class="cal-memo-weeks" id="calMemoWeeks"></div>
     </div>
   </div>
 </div>
@@ -805,6 +1033,36 @@
   </div>
 </div>
 
+<!-- ═══ Calendar Event Modal ═══ -->
+<div class="modal-overlay hidden" id="calEventModal">
+  <div class="modal" style="width:380px">
+    <h2 id="calEventModalTitle">일정 추가</h2>
+    <div class="form-group">
+      <label>제목 *</label>
+      <input type="text" id="calEventTitle" placeholder="일정 이름을 입력하세요" />
+    </div>
+    <div class="form-group" style="display:flex;gap:12px">
+      <div style="flex:1">
+        <label>시작일</label>
+        <input type="date" id="calEventStart" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit" />
+      </div>
+      <div style="flex:1">
+        <label>종료일</label>
+        <input type="date" id="calEventEnd" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>색상</label>
+      <div class="cal-color-swatches" id="calColorSwatches"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-danger hidden" id="calEventDeleteBtn" onclick="deleteCalEvent()">삭제</button>
+      <button class="btn" onclick="closeCalEventModal()">취소</button>
+      <button class="btn btn-primary" onclick="saveCalEvent()">저장</button>
+    </div>
+  </div>
+</div>
+
 <script type="module">
 // ════════════════════════════════════════════
 //  CONFIGURATION
@@ -882,7 +1140,7 @@ let rbStart = { x: 0, y: 0 };
 // ════════════════════════════════════════════
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc,
-         onSnapshot, query, orderBy, serverTimestamp }
+         onSnapshot, query, orderBy, serverTimestamp, setDoc, getDoc }
   from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 async function initFirebase(config) {
@@ -1696,6 +1954,7 @@ document.addEventListener('keydown', e => {
     document.getElementById('cardModal').classList.add('hidden');
     document.getElementById('userModal').classList.add('hidden');
     document.getElementById('guideModal').classList.add('hidden');
+    document.getElementById('calEventModal').classList.add('hidden');
     document.getElementById('status-dropdown')?.remove();
     COLUMNS.forEach(c => closeInlineForm(c.id));
     closeSidePanel();
@@ -1735,11 +1994,363 @@ document.getElementById('board').addEventListener('click', e => {
 });
 
 // Click outside modal closes it
-['cardModal','userModal','guideModal'].forEach(id => {
+['cardModal','userModal','guideModal','calEventModal'].forEach(id => {
   document.getElementById(id)?.addEventListener('click', function(e) {
     if (e.target === this) this.classList.add('hidden');
   });
 });
+
+// ════════════════════════════════════════════
+//  CALENDAR
+// ════════════════════════════════════════════
+let calYear  = new Date().getFullYear();
+let calMonth = new Date().getMonth();
+let calendarEvents  = [];
+let weeklyMemos     = {};
+let calUnsubscribe  = null;
+let calIsDragging   = false;
+let calDragStartDate = null;
+let editingCalEventId = null;
+let selectedCalColor  = '#3b82f6';
+
+const CAL_COLORS = [
+  '#ef4444','#f97316','#eab308','#22c55e',
+  '#3b82f6','#8b5cf6','#ec4899','#14b8a6',
+];
+
+function dateToStr(d) {
+  return d.getFullYear() + '-' +
+    String(d.getMonth() + 1).padStart(2, '0') + '-' +
+    String(d.getDate()).padStart(2, '0');
+}
+function parseDate(str) {
+  const [y, m, day] = str.split('-').map(Number);
+  return new Date(y, m - 1, day);
+}
+function todayStr() { return dateToStr(new Date()); }
+function getWeekKey(date) {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() + 4 - (d.getDay() || 7));
+  const yearStart = new Date(d.getFullYear(), 0, 1);
+  const wk = Math.ceil(((d - yearStart) / 86400000 + 1) / 7);
+  return d.getFullYear() + '-W' + String(wk).padStart(2, '0');
+}
+function calGridStart(year, month) {
+  const first = new Date(year, month, 1);
+  const gs = new Date(first);
+  gs.setDate(first.getDate() - first.getDay());
+  return gs;
+}
+
+// ── View toggle ──
+window.showCalendar = async () => {
+  if (!db) { showToast('Firebase 연결 후 사용 가능합니다'); return; }
+  document.getElementById('boardView').classList.add('hidden');
+  document.getElementById('calView').classList.remove('hidden');
+  document.getElementById('btnCalendar').classList.add('active');
+  document.getElementById('btnBoard').classList.remove('active');
+  startCalendarListener();
+  const keys = getCalendarWeekKeys();
+  await loadWeeklyMemos(keys);
+  renderCalendar();
+};
+window.showBoard = () => {
+  document.getElementById('calView').classList.add('hidden');
+  document.getElementById('boardView').classList.remove('hidden');
+  document.getElementById('btnBoard').classList.add('active');
+  document.getElementById('btnCalendar').classList.remove('active');
+};
+
+function getCalendarWeekKeys() {
+  const gs = calGridStart(calYear, calMonth);
+  return Array.from({ length: 6 }, (_, w) => {
+    const ws = new Date(gs);
+    ws.setDate(gs.getDate() + w * 7);
+    return getWeekKey(ws);
+  });
+}
+
+// ── Firestore listeners ──
+function startCalendarListener() {
+  if (calUnsubscribe) return; // already listening
+  const q = query(collection(db, 'calendarEvents'), orderBy('startDate', 'asc'));
+  calUnsubscribe = onSnapshot(q, snap => {
+    calendarEvents = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    if (!document.getElementById('calView').classList.contains('hidden')) {
+      renderCalendar();
+    }
+  });
+}
+
+async function loadWeeklyMemos(weekKeys) {
+  if (!db) return;
+  const results = await Promise.all(weekKeys.map(k => getDoc(doc(db, 'weeklyMemos', k))));
+  results.forEach((d, i) => {
+    weeklyMemos[weekKeys[i]] = d.exists() ? (d.data().memo || '') : '';
+  });
+}
+
+// ── Render ──
+function renderCalendar() {
+  const gs = calGridStart(calYear, calMonth);
+  document.getElementById('calMonthLabel').textContent =
+    calYear + '.' + String(calMonth + 1).padStart(2, '0');
+
+  const weeksEl     = document.getElementById('calWeeks');
+  const memoWeeksEl = document.getElementById('calMemoWeeks');
+  weeksEl.innerHTML = '';
+  memoWeeksEl.innerHTML = '';
+
+  for (let w = 0; w < 6; w++) {
+    const ws = new Date(gs); ws.setDate(gs.getDate() + w * 7);
+    const we = new Date(ws); we.setDate(ws.getDate() + 6);
+    const weekKey = getWeekKey(ws);
+
+    // ── Week row ──
+    const weekRow = document.createElement('div');
+    weekRow.className = 'cal-week-row';
+
+    const cellsEl = document.createElement('div');
+    cellsEl.className = 'cal-cells';
+
+    for (let d = 0; d < 7; d++) {
+      const day = new Date(ws); day.setDate(ws.getDate() + d);
+      const ds  = dateToStr(day);
+      const isToday       = ds === todayStr();
+      const isOtherMonth  = day.getMonth() !== calMonth;
+      const cell = document.createElement('div');
+      const cls  = ['cal-cell'];
+      if (isOtherMonth) cls.push('other-month');
+      if (d === 0) cls.push('sun');
+      if (d === 6) cls.push('sat');
+      cell.className   = cls.join(' ');
+      cell.dataset.date = ds;
+      cell.innerHTML   =
+        `<span class="cal-day-num${isToday ? ' today' : ''}">${day.getDate()}</span>`;
+      cellsEl.appendChild(cell);
+    }
+
+    const evLayer = document.createElement('div');
+    evLayer.className = 'cal-events-layer';
+
+    weekRow.appendChild(cellsEl);
+    weekRow.appendChild(evLayer);
+    weeksEl.appendChild(weekRow);
+    renderWeekEventBars(evLayer, ws, we);
+
+    // ── Memo row ──
+    const memoWeek = document.createElement('div');
+    memoWeek.className = 'cal-memo-week';
+
+    const lbl = document.createElement('div');
+    lbl.className   = 'cal-memo-week-label';
+    lbl.textContent = `${ws.getMonth()+1}/${ws.getDate()} – ${we.getMonth()+1}/${we.getDate()}`;
+
+    const ta = document.createElement('textarea');
+    ta.className        = 'cal-memo-textarea';
+    ta.placeholder      = '메모...';
+    ta.value            = weeklyMemos[weekKey] || '';
+    ta.dataset.weekKey  = weekKey;
+    ta.addEventListener('blur', saveWeeklyMemo);
+
+    memoWeek.appendChild(lbl);
+    memoWeek.appendChild(ta);
+    memoWeeksEl.appendChild(memoWeek);
+  }
+
+  setupCalDrag();
+}
+
+function renderWeekEventBars(layer, ws, we) {
+  const overlapping = calendarEvents.filter(ev => {
+    const s = parseDate(ev.startDate);
+    const e = parseDate(ev.endDate);
+    return s <= we && e >= ws;
+  });
+  if (!overlapping.length) return;
+
+  const lanes = [];
+  const items = [];
+
+  overlapping.forEach(ev => {
+    const evS = parseDate(ev.startDate);
+    const evE = parseDate(ev.endDate);
+    const visS = evS < ws ? ws : evS;
+    const visE = evE > we ? we : evE;
+    const sd = Math.round((visS - ws) / 86400000);
+    const ed = Math.round((visE - ws) / 86400000);
+
+    let lane = 0;
+    while (lanes[lane]?.some(([a, b]) => a <= ed && b >= sd)) lane++;
+    if (!lanes[lane]) lanes[lane] = [];
+    lanes[lane].push([sd, ed]);
+    items.push({ ev, sd, ed, lane, isStart: evS >= ws });
+  });
+
+  const laneH = 20;
+  layer.style.minHeight = (lanes.length * laneH + 4) + 'px';
+
+  items.forEach(({ ev, sd, ed, lane, isStart }) => {
+    const span = ed - sd + 1;
+    const bar  = document.createElement('div');
+    bar.className = 'cal-event-bar';
+    bar.style.left       = `calc(${sd} / 7 * 100%)`;
+    bar.style.width      = `calc(${span} / 7 * 100% - 4px)`;
+    bar.style.top        = `${lane * laneH + 2}px`;
+    bar.style.background = ev.color || '#3b82f6';
+    bar.textContent      = isStart ? ev.title : '';
+    bar.title            = ev.title;
+    bar.addEventListener('click', e => { e.stopPropagation(); openEditCalEvent(ev.id); });
+    layer.appendChild(bar);
+  });
+}
+
+// ── Drag to select dates ──
+function setupCalDrag() {
+  document.querySelectorAll('.cal-cell').forEach(cell => {
+    cell.addEventListener('mousedown', e => {
+      if (e.button !== 0) return;
+      e.preventDefault();
+      calIsDragging    = true;
+      calDragStartDate = cell.dataset.date;
+      updateCalDragHighlight(cell.dataset.date);
+    });
+    cell.addEventListener('mouseover', () => {
+      if (!calIsDragging) return;
+      updateCalDragHighlight(cell.dataset.date);
+    });
+  });
+}
+
+function updateCalDragHighlight(cur) {
+  const s = calDragStartDate < cur ? calDragStartDate : cur;
+  const e = calDragStartDate < cur ? cur : calDragStartDate;
+  document.querySelectorAll('.cal-cell').forEach(c => {
+    const d = c.dataset.date;
+    c.classList.toggle('cal-drag-highlight', d >= s && d <= e);
+  });
+}
+function clearCalDragHighlight() {
+  document.querySelectorAll('.cal-cell').forEach(c => c.classList.remove('cal-drag-highlight'));
+}
+
+document.addEventListener('mouseup', e => {
+  if (!calIsDragging) return;
+  calIsDragging = false;
+  const overCell  = e.target.closest?.('.cal-cell');
+  const endDate   = overCell?.dataset?.date || calDragStartDate;
+  if (calDragStartDate) {
+    const start = calDragStartDate < endDate ? calDragStartDate : endDate;
+    const end   = calDragStartDate < endDate ? endDate : calDragStartDate;
+    openCreateCalEvent(start, end);
+  }
+  clearCalDragHighlight();
+  calDragStartDate = null;
+}, true);
+
+// ── Event modal ──
+function openCreateCalEvent(start, end) {
+  editingCalEventId = null;
+  selectedCalColor  = CAL_COLORS[4];
+  document.getElementById('calEventTitle').value = '';
+  document.getElementById('calEventStart').value = start;
+  document.getElementById('calEventEnd').value   = end;
+  document.getElementById('calEventModalTitle').textContent = '일정 추가';
+  document.getElementById('calEventDeleteBtn').classList.add('hidden');
+  renderCalColorSwatches();
+  document.getElementById('calEventModal').classList.remove('hidden');
+  setTimeout(() => document.getElementById('calEventTitle').focus(), 50);
+}
+
+function openEditCalEvent(id) {
+  const ev = calendarEvents.find(e => e.id === id);
+  if (!ev) return;
+  editingCalEventId = id;
+  selectedCalColor  = ev.color || CAL_COLORS[4];
+  document.getElementById('calEventTitle').value = ev.title;
+  document.getElementById('calEventStart').value = ev.startDate;
+  document.getElementById('calEventEnd').value   = ev.endDate;
+  document.getElementById('calEventModalTitle').textContent = '일정 수정';
+  document.getElementById('calEventDeleteBtn').classList.remove('hidden');
+  renderCalColorSwatches();
+  document.getElementById('calEventModal').classList.remove('hidden');
+}
+
+function renderCalColorSwatches() {
+  const container = document.getElementById('calColorSwatches');
+  container.innerHTML = '';
+  CAL_COLORS.forEach(color => {
+    const s = document.createElement('div');
+    s.className   = 'cal-color-swatch' + (color === selectedCalColor ? ' selected' : '');
+    s.style.background = color;
+    s.onclick = () => { selectedCalColor = color; renderCalColorSwatches(); };
+    container.appendChild(s);
+  });
+}
+
+window.closeCalEventModal = () => {
+  document.getElementById('calEventModal').classList.add('hidden');
+  editingCalEventId = null;
+};
+
+window.saveCalEvent = async () => {
+  if (!db) return;
+  const title = document.getElementById('calEventTitle').value.trim();
+  if (!title) { document.getElementById('calEventTitle').focus(); return; }
+  let start = document.getElementById('calEventStart').value;
+  let end   = document.getElementById('calEventEnd').value;
+  if (start > end) [start, end] = [end, start];
+  const data = { title, startDate: start, endDate: end, color: selectedCalColor };
+  try {
+    if (editingCalEventId) {
+      await updateDoc(doc(db, 'calendarEvents', editingCalEventId), data);
+      showToast('일정이 수정됐습니다');
+    } else {
+      await addDoc(collection(db, 'calendarEvents'), { ...data, createdAt: serverTimestamp() });
+      showToast('일정이 추가됐습니다');
+    }
+    closeCalEventModal();
+  } catch (err) { showToast('오류: ' + err.message); }
+};
+
+window.deleteCalEvent = async () => {
+  if (!editingCalEventId || !db) return;
+  if (!confirm('이 일정을 삭제할까요?')) return;
+  try {
+    await deleteDoc(doc(db, 'calendarEvents', editingCalEventId));
+    showToast('삭제됐습니다');
+    closeCalEventModal();
+  } catch (err) { showToast('오류: ' + err.message); }
+};
+
+async function saveWeeklyMemo(e) {
+  if (!db) return;
+  const key  = e.target.dataset.weekKey;
+  const memo = e.target.value;
+  weeklyMemos[key] = memo;
+  try { await setDoc(doc(db, 'weeklyMemos', key), { memo }); }
+  catch (err) { showToast('메모 저장 실패: ' + err.message); }
+}
+
+// ── Navigation ──
+window.calPrev = async () => {
+  if (--calMonth < 0) { calMonth = 11; calYear--; }
+  await loadWeeklyMemos(getCalendarWeekKeys());
+  renderCalendar();
+};
+window.calNext = async () => {
+  if (++calMonth > 11) { calMonth = 0; calYear++; }
+  await loadWeeklyMemos(getCalendarWeekKeys());
+  renderCalendar();
+};
+window.calToday = async () => {
+  const now = new Date();
+  calYear  = now.getFullYear();
+  calMonth = now.getMonth();
+  await loadWeeklyMemos(getCalendarWeekKeys());
+  renderCalendar();
+};
 
 // ════════════════════════════════════════════
 //  BOOT
