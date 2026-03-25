@@ -356,14 +356,23 @@
     .side-panel-inner {
       width: 480px;
       height: 100%;
-      overflow-y: auto;
-      padding: 28px 28px 40px;
+      overflow: hidden;
+      padding: 28px 28px 0;
       display: flex;
       flex-direction: column;
       gap: 0;
     }
-    .side-panel-inner::-webkit-scrollbar { width: 4px; }
-    .side-panel-inner::-webkit-scrollbar-thumb { background: #c0c4cf; border-radius: 4px; }
+    .sp-body {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      padding-bottom: 40px;
+      display: flex;
+      flex-direction: column;
+    }
+    .sp-body::-webkit-scrollbar { width: 4px; }
+    .sp-body::-webkit-scrollbar-thumb { background: #c0c4cf; border-radius: 4px; }
 
     .sp-topbar {
       display: flex; justify-content: flex-end; align-items: center;
@@ -431,7 +440,7 @@
       font-size: 13px; line-height: 1.7;
       border: none; outline: none; width: 100%;
       background: transparent; font-family: inherit; color: var(--text);
-      resize: none; overflow: hidden; min-height: 200px;
+      resize: none; overflow: hidden; min-height: 0; flex: 1;
       padding: 6px 4px; border-radius: 4px;
     }
     .sp-desc:hover { background: #f8f9fa; }
@@ -666,16 +675,17 @@
         </div>
       </div>
 
-      <div class="sp-section-title">설명</div>
-      <textarea class="sp-desc" id="spDesc" placeholder="자세한 내용을 입력하세요..."
-        oninput="autoResizeTextarea(this)"
-        onblur="savePanelField('description', this.value)"></textarea>
-      <div class="sp-paste-hint">이미지를 Ctrl+V로 붙여넣을 수 있습니다</div>
+      <div class="sp-body">
+        <div class="sp-section-title">설명</div>
+        <textarea class="sp-desc" id="spDesc" placeholder="자세한 내용을 입력하세요..."
+          onblur="savePanelField('description', this.value)"></textarea>
+        <div class="sp-paste-hint">이미지를 Ctrl+V로 붙여넣을 수 있습니다</div>
 
-      <div class="sp-images" id="spImages"></div>
+        <div class="sp-images" id="spImages"></div>
 
-      <div class="sp-footer">
-        <button class="btn btn-danger" id="spDeleteBtn">삭제</button>
+        <div class="sp-footer">
+          <button class="btn btn-danger" id="spDeleteBtn">삭제</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1236,7 +1246,6 @@ window.openDetail = (id) => {
   // description
   const descEl = document.getElementById('spDesc');
   descEl.value = c.description || '';
-  autoResizeTextarea(descEl);
 
   // images
   renderPanelImages(c.images);
@@ -1251,10 +1260,9 @@ window.openDetail = (id) => {
 
   document.getElementById('sidePanel').classList.add('open');
 
-  // re-calculate textarea heights after panel becomes visible
+  // re-calculate title height after panel becomes visible
   requestAnimationFrame(() => {
     autoResizeTextarea(document.getElementById('spTitle'));
-    autoResizeTextarea(document.getElementById('spDesc'));
   });
 
   // highlight selected card
