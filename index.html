@@ -431,7 +431,7 @@
       font-size: 13px; line-height: 1.7;
       border: none; outline: none; width: 100%;
       background: transparent; font-family: inherit; color: var(--text);
-      resize: none; overflow: hidden; min-height: 60px;
+      resize: none; overflow: hidden; min-height: 200px;
       padding: 6px 4px; border-radius: 4px;
     }
     .sp-desc:hover { background: #f8f9fa; }
@@ -1250,6 +1250,12 @@ window.openDetail = (id) => {
   };
 
   document.getElementById('sidePanel').classList.add('open');
+
+  // re-calculate textarea heights after panel becomes visible
+  requestAnimationFrame(() => {
+    autoResizeTextarea(document.getElementById('spTitle'));
+    autoResizeTextarea(document.getElementById('spDesc'));
+  });
 
   // highlight selected card
   document.querySelectorAll('.card').forEach(el => el.classList.remove('selected'));
