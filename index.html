@@ -593,6 +593,189 @@
     }
     .sel-clear-btn:hover { color: white; }
 
+    /* ─── Gantt View ─── */
+    .gantt-view {
+      padding: 0 40px 16px;
+      max-width: 1800px;
+      margin: 0 auto;
+      height: calc(100vh - 108px);
+      display: flex;
+      flex-direction: column;
+    }
+    .gantt-topbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 0 10px;
+      flex-shrink: 0;
+    }
+    .gantt-month-label {
+      font-size: 16px;
+      font-weight: 700;
+      min-width: 80px;
+    }
+    .gantt-zoom-wrap {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .gantt-zoom-wrap input[type=range] {
+      width: 100px;
+      accent-color: #3b82f6;
+      cursor: pointer;
+    }
+    .gantt-main {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      background: white;
+    }
+    .gantt-labels {
+      width: 220px;
+      flex-shrink: 0;
+      border-right: 2px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      background: #fafbfc;
+    }
+    .gantt-labels-header {
+      height: 40px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      font-weight: 700;
+      font-size: 11px;
+      color: var(--text-muted);
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+    .gantt-label-rows {
+      flex: 1;
+      overflow-y: hidden;
+      overflow-x: hidden;
+    }
+    .gantt-label-row {
+      height: 44px;
+      display: flex;
+      align-items: center;
+      padding: 0 12px 0 16px;
+      border-bottom: 1px solid var(--border);
+      gap: 8px;
+      font-size: 13px;
+    }
+    .gantt-label-row:last-child { border-bottom: none; }
+    .gantt-label-title {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .gantt-label-empty { min-height: 44px; }
+    .gantt-grid-wrap {
+      flex: 1;
+      overflow: auto;
+      position: relative;
+    }
+    .gantt-grid-wrap::-webkit-scrollbar { height: 6px; width: 4px; }
+    .gantt-grid-wrap::-webkit-scrollbar-thumb { background: #c0c4cf; border-radius: 4px; }
+    .gantt-grid-inner { position: relative; }
+    .gantt-grid-header {
+      display: flex;
+      position: sticky;
+      top: 0;
+      background: #fafbfc;
+      z-index: 10;
+      border-bottom: 2px solid var(--border);
+      height: 40px;
+    }
+    .gantt-day-col {
+      flex-shrink: 0;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-right: 1px solid var(--border);
+      position: relative;
+    }
+    .gantt-day-col.weekend { background: #f1f2f4; color: #b0b8cc; }
+    .gantt-day-col.today-col {
+      color: #3b82f6;
+      font-weight: 800;
+    }
+    .gantt-grid-rows { position: relative; }
+    .gantt-row {
+      height: 44px;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+      display: flex;
+      cursor: crosshair;
+    }
+    .gantt-row:last-child { border-bottom: none; }
+    .gantt-row-cell {
+      flex-shrink: 0;
+      height: 100%;
+      border-right: 1px solid #f1f2f4;
+    }
+    .gantt-row-cell.weekend { background: #fafbfc; }
+    .gantt-bar {
+      position: absolute;
+      height: 28px;
+      top: 8px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      font-size: 11px;
+      font-weight: 600;
+      color: white;
+      cursor: pointer;
+      z-index: 2;
+      overflow: hidden;
+      white-space: nowrap;
+      gap: 6px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.18);
+      transition: filter 0.1s;
+    }
+    .gantt-bar:hover { filter: brightness(0.88); }
+    .gantt-bar-title { flex: 1; overflow: hidden; text-overflow: ellipsis; }
+    .gantt-drag-preview {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      background: rgba(59,130,246,0.1);
+      border: 2px dashed rgba(59,130,246,0.45);
+      border-radius: 4px;
+      pointer-events: none;
+      z-index: 4;
+    }
+    .gantt-today-line {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: rgba(59,130,246,0.6);
+      z-index: 3;
+      pointer-events: none;
+    }
+    .gantt-empty-hint {
+      color: var(--text-muted);
+      font-size: 12px;
+      text-align: center;
+      padding: 20px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
     /* ─── Calendar View ─── */
     .cal-view {
       padding: 0 40px 16px;
@@ -825,6 +1008,7 @@
     <div class="divider"></div>
     <button class="btn active" id="btnBoard" onclick="showBoard()">📋 보드</button>
     <button class="btn" id="btnCalendar" onclick="showCalendar()">📅 캘린더</button>
+    <button class="btn" id="btnGantt" onclick="showGantt()">📊 간트</button>
     <div class="divider"></div>
     <button class="btn btn-primary" onclick="openAddModal(null)">
       + 새 카드
@@ -886,6 +1070,33 @@
         <div class="sp-footer">
           <button class="btn btn-danger" id="spDeleteBtn">삭제</button>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Gantt View -->
+<div class="gantt-view hidden" id="ganttView">
+  <div class="gantt-topbar">
+    <button class="btn" onclick="ganttGoToday()">Today</button>
+    <button class="btn" onclick="ganttPrev()">‹</button>
+    <button class="btn" onclick="ganttNext()">›</button>
+    <span class="gantt-month-label" id="ganttMonthLabel"></span>
+    <div class="gantt-zoom-wrap">
+      <span>Zoom</span>
+      <input type="range" id="ganttZoom" min="24" max="80" value="36"
+        oninput="setGanttZoom(this.value)">
+    </div>
+  </div>
+  <div class="gantt-main">
+    <div class="gantt-labels">
+      <div class="gantt-labels-header">작업</div>
+      <div class="gantt-label-rows" id="ganttLabelRows"></div>
+    </div>
+    <div class="gantt-grid-wrap" id="ganttGridWrap">
+      <div class="gantt-grid-inner" id="ganttGridInner">
+        <div class="gantt-grid-header" id="ganttGridHeader"></div>
+        <div class="gantt-grid-rows" id="ganttGridRows"></div>
       </div>
     </div>
   </div>
@@ -1029,6 +1240,42 @@
     </ol>
     <div class="modal-actions">
       <button class="btn btn-primary" onclick="document.getElementById('guideModal').classList.add('hidden')">확인</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Gantt Task Modal ═══ -->
+<div class="modal-overlay hidden" id="ganttModal">
+  <div class="modal" style="width:400px">
+    <h2 id="ganttModalTitle">작업 추가</h2>
+    <div class="form-group">
+      <label>작업명 *</label>
+      <input type="text" id="ganttTaskTitle" placeholder="작업명을 입력하세요" />
+    </div>
+    <div class="form-group" style="display:flex;gap:12px">
+      <div style="flex:1">
+        <label>시작일</label>
+        <input type="date" id="ganttTaskStart" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit" />
+      </div>
+      <div style="flex:1">
+        <label>종료일</label>
+        <input type="date" id="ganttTaskEnd" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>담당자</label>
+      <select id="ganttTaskAssignee" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit">
+        <option value="">없음</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>색상</label>
+      <div class="cal-color-swatches" id="ganttColorSwatches"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-danger hidden" id="ganttDeleteBtn" onclick="deleteGanttTask()">삭제</button>
+      <button class="btn" onclick="closeGanttModal()">취소</button>
+      <button class="btn btn-primary" onclick="saveGanttTask()">저장</button>
     </div>
   </div>
 </div>
@@ -1955,6 +2202,7 @@ document.addEventListener('keydown', e => {
     document.getElementById('userModal').classList.add('hidden');
     document.getElementById('guideModal').classList.add('hidden');
     document.getElementById('calEventModal').classList.add('hidden');
+    document.getElementById('ganttModal').classList.add('hidden');
     document.getElementById('status-dropdown')?.remove();
     COLUMNS.forEach(c => closeInlineForm(c.id));
     closeSidePanel();
@@ -1994,7 +2242,7 @@ document.getElementById('board').addEventListener('click', e => {
 });
 
 // Click outside modal closes it
-['cardModal','userModal','guideModal','calEventModal'].forEach(id => {
+['cardModal','userModal','guideModal','calEventModal','ganttModal'].forEach(id => {
   document.getElementById(id)?.addEventListener('click', function(e) {
     if (e.target === this) this.classList.add('hidden');
   });
@@ -2047,9 +2295,11 @@ function calGridStart(year, month) {
 window.showCalendar = async () => {
   if (!db) { showToast('Firebase 연결 후 사용 가능합니다'); return; }
   document.getElementById('boardView').classList.add('hidden');
+  document.getElementById('ganttView').classList.add('hidden');
   document.getElementById('calView').classList.remove('hidden');
   document.getElementById('btnCalendar').classList.add('active');
   document.getElementById('btnBoard').classList.remove('active');
+  document.getElementById('btnGantt').classList.remove('active');
   startCalendarListener();
   const keys = getCalendarWeekKeys();
   await loadWeeklyMemos(keys);
@@ -2057,9 +2307,11 @@ window.showCalendar = async () => {
 };
 window.showBoard = () => {
   document.getElementById('calView').classList.add('hidden');
+  document.getElementById('ganttView').classList.add('hidden');
   document.getElementById('boardView').classList.remove('hidden');
   document.getElementById('btnBoard').classList.add('active');
   document.getElementById('btnCalendar').classList.remove('active');
+  document.getElementById('btnGantt').classList.remove('active');
 };
 
 function getCalendarWeekKeys() {
@@ -2350,6 +2602,345 @@ window.calToday = async () => {
   calMonth = now.getMonth();
   await loadWeeklyMemos(getCalendarWeekKeys());
   renderCalendar();
+};
+
+// ════════════════════════════════════════════
+//  GANTT
+// ════════════════════════════════════════════
+let ganttYear  = new Date().getFullYear();
+let ganttMonth = new Date().getMonth();
+let ganttTasks = [];
+let ganttColWidth = 36;
+let ganttDaysInMonth = 30;
+let ganttUnsubscribe = null;
+let ganttDragging = false;
+let ganttDragStartDay = 0;
+let ganttDragCurrentDay = 0;
+let editingGanttId = null;
+let selectedGanttColor = '#60a5fa';
+let ganttScrollSyncSetup = false;
+
+// ── View toggle ──
+window.showGantt = () => {
+  if (!db) { showToast('Firebase 연결 후 사용 가능합니다'); return; }
+  document.getElementById('boardView').classList.add('hidden');
+  document.getElementById('calView').classList.add('hidden');
+  document.getElementById('ganttView').classList.remove('hidden');
+  document.getElementById('btnGantt').classList.add('active');
+  document.getElementById('btnBoard').classList.remove('active');
+  document.getElementById('btnCalendar').classList.remove('active');
+  startGanttListener();
+  setupGanttScrollSync();
+};
+
+function startGanttListener() {
+  if (ganttUnsubscribe) return;
+  const q = query(collection(db, 'ganttTasks'), orderBy('startDate', 'asc'));
+  ganttUnsubscribe = onSnapshot(q, snap => {
+    ganttTasks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    if (!document.getElementById('ganttView').classList.contains('hidden')) {
+      renderGantt();
+    }
+  });
+}
+
+function setupGanttScrollSync() {
+  if (ganttScrollSyncSetup) return;
+  ganttScrollSyncSetup = true;
+  document.getElementById('ganttGridWrap').addEventListener('scroll', function () {
+    document.getElementById('ganttLabelRows').scrollTop = this.scrollTop;
+  });
+}
+
+// ── Render ──
+function renderGantt() {
+  ganttDaysInMonth = new Date(ganttYear, ganttMonth + 1, 0).getDate();
+  const totalW = ganttDaysInMonth * ganttColWidth;
+
+  document.getElementById('ganttMonthLabel').textContent =
+    ganttYear + '.' + String(ganttMonth + 1).padStart(2, '0');
+
+  const headerEl  = document.getElementById('ganttGridHeader');
+  const rowsEl    = document.getElementById('ganttGridRows');
+  const labelsEl  = document.getElementById('ganttLabelRows');
+  const innerEl   = document.getElementById('ganttGridInner');
+
+  headerEl.innerHTML = '';
+  rowsEl.innerHTML   = '';
+  labelsEl.innerHTML = '';
+  headerEl.style.width = totalW + 'px';
+  innerEl.style.width  = totalW + 'px';
+
+  // ── Header days ──
+  for (let d = 1; d <= ganttDaysInMonth; d++) {
+    const day = new Date(ganttYear, ganttMonth, d);
+    const isWE   = day.getDay() === 0 || day.getDay() === 6;
+    const isToday = dateToStr(day) === todayStr();
+    const col = document.createElement('div');
+    col.className = 'gantt-day-col' + (isWE ? ' weekend' : '') + (isToday ? ' today-col' : '');
+    col.style.width = ganttColWidth + 'px';
+    col.textContent = d;
+    headerEl.appendChild(col);
+  }
+
+  const sorted = [...ganttTasks].sort((a, b) => a.startDate.localeCompare(b.startDate));
+  const monthStart = new Date(ganttYear, ganttMonth, 1);
+  const monthEnd   = new Date(ganttYear, ganttMonth + 1, 0);
+
+  // ── Task rows ──
+  sorted.forEach(task => {
+    // Label
+    const labelRow = document.createElement('div');
+    labelRow.className = 'gantt-label-row';
+    const member = MEMBERS.find(m => m.name === task.assignee);
+    labelRow.innerHTML =
+      `<span class="gantt-label-title">${task.title}</span>` +
+      (member ? `<span style="font-size:16px;flex-shrink:0">${member.emoji}</span>` : '');
+    labelsEl.appendChild(labelRow);
+
+    // Grid row
+    const row = createGanttRow(ganttDaysInMonth, ganttColWidth);
+    rowsEl.appendChild(row);
+
+    // Bar
+    const tS = parseDate(task.startDate);
+    const tE = parseDate(task.endDate);
+    if (tS <= monthEnd && tE >= monthStart) {
+      const visS = tS < monthStart ? monthStart : tS;
+      const visE = tE > monthEnd   ? monthEnd   : tE;
+      const startOff = Math.round((visS - monthStart) / 86400000);
+      const dur      = Math.round((visE - visS) / 86400000) + 1;
+      const bar = document.createElement('div');
+      bar.className = 'gantt-bar';
+      bar.style.left       = (startOff * ganttColWidth + 3) + 'px';
+      bar.style.width      = (dur * ganttColWidth - 6) + 'px';
+      bar.style.background = task.color || '#60a5fa';
+      bar.innerHTML =
+        `<span class="gantt-bar-title">${task.title}</span>` +
+        (member ? `<span style="font-size:14px">${member.emoji}</span>` : '');
+      bar.title = task.title;
+      bar.addEventListener('click', e => { e.stopPropagation(); openEditGanttTask(task.id); });
+      row.appendChild(bar);
+    }
+  });
+
+  // ── Empty rows for drag-to-create ──
+  const emptyCount = Math.max(6, 12 - sorted.length);
+  for (let i = 0; i < emptyCount; i++) {
+    const emptyLabel = document.createElement('div');
+    emptyLabel.className = 'gantt-label-row gantt-label-empty';
+    labelsEl.appendChild(emptyLabel);
+    rowsEl.appendChild(createGanttRow(ganttDaysInMonth, ganttColWidth));
+  }
+
+  if (sorted.length === 0) {
+    const hint = document.createElement('div');
+    hint.className = 'gantt-empty-hint';
+    hint.textContent = '날짜 영역을 클릭 앤 드래그해서 첫 번째 작업을 추가하세요';
+    hint.style.position = 'absolute';
+    hint.style.top = '50px';
+    hint.style.left = '0';
+    hint.style.right = '0';
+    hint.style.pointerEvents = 'none';
+    rowsEl.appendChild(hint);
+  }
+
+  // Today line
+  const today = new Date();
+  if (today.getFullYear() === ganttYear && today.getMonth() === ganttMonth) {
+    const line = document.createElement('div');
+    line.className = 'gantt-today-line';
+    line.style.left = ((today.getDate() - 1) * ganttColWidth + ganttColWidth / 2) + 'px';
+    rowsEl.appendChild(line);
+  }
+
+  setupGanttDrag();
+}
+
+function createGanttRow(days, colW) {
+  const row = document.createElement('div');
+  row.className = 'gantt-row';
+  for (let d = 1; d <= days; d++) {
+    const cell = document.createElement('div');
+    const day  = new Date(ganttYear, ganttMonth, d);
+    cell.className = 'gantt-row-cell' + (day.getDay() === 0 || day.getDay() === 6 ? ' weekend' : '');
+    cell.style.width = colW + 'px';
+    row.appendChild(cell);
+  }
+  return row;
+}
+
+// ── Drag to create ──
+function setupGanttDrag() {
+  const rowsEl = document.getElementById('ganttGridRows');
+  rowsEl.addEventListener('mousedown', ganttMouseDown);
+}
+
+function ganttMouseDown(e) {
+  if (e.button !== 0) return;
+  if (e.target.closest('.gantt-bar')) return;
+  e.preventDefault();
+  ganttDragging = true;
+  ganttDragStartDay   = getGanttDayFromMouse(e);
+  ganttDragCurrentDay = ganttDragStartDay;
+  updateGanttDragPreview();
+}
+
+function getGanttDayFromMouse(e) {
+  const wrap = document.getElementById('ganttGridWrap');
+  const rows = document.getElementById('ganttGridRows');
+  const rect = rows.getBoundingClientRect();
+  const x    = e.clientX - rect.left + wrap.scrollLeft;
+  return Math.max(0, Math.min(ganttDaysInMonth - 1, Math.floor(x / ganttColWidth)));
+}
+
+document.addEventListener('mousemove', e => {
+  if (!ganttDragging) return;
+  ganttDragCurrentDay = getGanttDayFromMouse(e);
+  updateGanttDragPreview();
+});
+
+document.addEventListener('mouseup', e => {
+  if (!ganttDragging) return;
+  ganttDragging = false;
+  removeGanttDragPreview();
+  const s = Math.min(ganttDragStartDay, ganttDragCurrentDay);
+  const en = Math.max(ganttDragStartDay, ganttDragCurrentDay);
+  const startStr = dateToStr(new Date(ganttYear, ganttMonth, s + 1));
+  const endStr   = dateToStr(new Date(ganttYear, ganttMonth, en + 1));
+  openCreateGanttTask(startStr, endStr);
+});
+
+function updateGanttDragPreview() {
+  const rowsEl = document.getElementById('ganttGridRows');
+  let preview  = document.getElementById('ganttDragPreview');
+  if (!preview) {
+    preview = document.createElement('div');
+    preview.className = 'gantt-drag-preview';
+    preview.id = 'ganttDragPreview';
+    rowsEl.appendChild(preview);
+  }
+  const s  = Math.min(ganttDragStartDay, ganttDragCurrentDay);
+  const en = Math.max(ganttDragStartDay, ganttDragCurrentDay);
+  preview.style.left  = (s * ganttColWidth) + 'px';
+  preview.style.width = ((en - s + 1) * ganttColWidth) + 'px';
+}
+function removeGanttDragPreview() {
+  document.getElementById('ganttDragPreview')?.remove();
+}
+
+// ── Modal ──
+function buildGanttAssigneeSelect(current) {
+  const sel = document.getElementById('ganttTaskAssignee');
+  sel.innerHTML = '<option value="">없음</option>';
+  MEMBERS.forEach(m => {
+    const opt = document.createElement('option');
+    opt.value = m.name;
+    opt.textContent = m.emoji + ' ' + m.name;
+    if (m.name === current) opt.selected = true;
+    sel.appendChild(opt);
+  });
+}
+
+function renderGanttColorSwatches() {
+  const container = document.getElementById('ganttColorSwatches');
+  container.innerHTML = '';
+  CAL_COLORS.forEach(color => {
+    const s = document.createElement('div');
+    s.className = 'cal-color-swatch' + (color === selectedGanttColor ? ' selected' : '');
+    s.style.background = color;
+    s.onclick = () => { selectedGanttColor = color; renderGanttColorSwatches(); };
+    container.appendChild(s);
+  });
+}
+
+function openCreateGanttTask(start, end) {
+  editingGanttId    = null;
+  selectedGanttColor = CAL_COLORS[0];
+  document.getElementById('ganttTaskTitle').value  = '';
+  document.getElementById('ganttTaskStart').value  = start;
+  document.getElementById('ganttTaskEnd').value    = end;
+  document.getElementById('ganttModalTitle').textContent = '작업 추가';
+  document.getElementById('ganttDeleteBtn').classList.add('hidden');
+  buildGanttAssigneeSelect('');
+  renderGanttColorSwatches();
+  document.getElementById('ganttModal').classList.remove('hidden');
+  setTimeout(() => document.getElementById('ganttTaskTitle').focus(), 50);
+}
+
+function openEditGanttTask(id) {
+  const task = ganttTasks.find(t => t.id === id);
+  if (!task) return;
+  editingGanttId     = id;
+  selectedGanttColor = task.color || CAL_COLORS[0];
+  document.getElementById('ganttTaskTitle').value  = task.title;
+  document.getElementById('ganttTaskStart').value  = task.startDate;
+  document.getElementById('ganttTaskEnd').value    = task.endDate;
+  document.getElementById('ganttModalTitle').textContent = '작업 수정';
+  document.getElementById('ganttDeleteBtn').classList.remove('hidden');
+  buildGanttAssigneeSelect(task.assignee || '');
+  renderGanttColorSwatches();
+  document.getElementById('ganttModal').classList.remove('hidden');
+}
+
+window.closeGanttModal = () => {
+  document.getElementById('ganttModal').classList.add('hidden');
+  editingGanttId = null;
+};
+
+window.saveGanttTask = async () => {
+  if (!db) return;
+  const title = document.getElementById('ganttTaskTitle').value.trim();
+  if (!title) { document.getElementById('ganttTaskTitle').focus(); return; }
+  let start = document.getElementById('ganttTaskStart').value;
+  let end   = document.getElementById('ganttTaskEnd').value;
+  if (start > end) [start, end] = [end, start];
+  const data = {
+    title,
+    startDate: start,
+    endDate: end,
+    assignee: document.getElementById('ganttTaskAssignee').value,
+    color: selectedGanttColor,
+  };
+  try {
+    if (editingGanttId) {
+      await updateDoc(doc(db, 'ganttTasks', editingGanttId), data);
+      showToast('작업이 수정됐습니다');
+    } else {
+      await addDoc(collection(db, 'ganttTasks'), { ...data, createdAt: serverTimestamp() });
+      showToast('작업이 추가됐습니다');
+    }
+    closeGanttModal();
+  } catch (err) { showToast('오류: ' + err.message); }
+};
+
+window.deleteGanttTask = async () => {
+  if (!editingGanttId || !db) return;
+  if (!confirm('이 작업을 삭제할까요?')) return;
+  try {
+    await deleteDoc(doc(db, 'ganttTasks', editingGanttId));
+    showToast('삭제됐습니다');
+    closeGanttModal();
+  } catch (err) { showToast('오류: ' + err.message); }
+};
+
+// ── Navigation & Zoom ──
+window.ganttPrev = () => {
+  if (--ganttMonth < 0) { ganttMonth = 11; ganttYear--; }
+  renderGantt();
+};
+window.ganttNext = () => {
+  if (++ganttMonth > 11) { ganttMonth = 0; ganttYear++; }
+  renderGantt();
+};
+window.ganttGoToday = () => {
+  ganttYear  = new Date().getFullYear();
+  ganttMonth = new Date().getMonth();
+  renderGantt();
+};
+window.setGanttZoom = val => {
+  ganttColWidth = Number(val);
+  renderGantt();
 };
 
 // ════════════════════════════════════════════
