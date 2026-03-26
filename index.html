@@ -650,8 +650,8 @@
       background: #fafbfc;
     }
     .gantt-labels-header {
-      height: 40px;
-      border-bottom: 1px solid var(--border);
+      height: 56px;
+      border-bottom: 2px solid var(--border);
       display: flex;
       align-items: center;
       padding: 0 16px;
@@ -694,16 +694,33 @@
     .gantt-grid-inner { position: relative; }
     .gantt-grid-header {
       display: flex;
+      flex-direction: column;
       position: sticky;
       top: 0;
       background: #fafbfc;
       z-index: 10;
       border-bottom: 2px solid var(--border);
-      height: 40px;
     }
+    .gantt-month-header-row {
+      display: flex;
+      height: 28px;
+      border-bottom: 1px solid var(--border);
+    }
+    .gantt-month-cell {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text);
+      border-right: 2px solid var(--border);
+      background: #fafbfc;
+    }
+    .gantt-day-header-row { display: flex; height: 28px; }
     .gantt-day-col {
       flex-shrink: 0;
-      height: 40px;
+      height: 28px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -718,6 +735,12 @@
       color: #3b82f6;
       font-weight: 800;
     }
+    .gantt-add-row {
+      cursor: pointer;
+      color: #0c66e4;
+      font-weight: 500;
+    }
+    .gantt-add-row:hover { background: rgba(12,102,228,0.06); }
     .gantt-grid-rows { position: relative; }
     .gantt-row {
       height: 44px;
@@ -2618,9 +2641,9 @@ window.calToday = async () => {
 // ════════════════════════════════════════════
 let ganttYear  = new Date().getFullYear();
 let ganttMonth = new Date().getMonth();
+const GANTT_VIEW_MONTHS = 3;
 let ganttTasks = [];
 let ganttColWidth = 36;
-let ganttDaysInMonth = 30;
 let ganttUnsubscribe = null;
 let ganttDragging = false;
 let ganttDragStartDay = 0;
@@ -2628,6 +2651,30 @@ let ganttDragCurrentDay = 0;
 let editingGanttId = null;
 let selectedGanttColor = '#60a5fa';
 let ganttScrollSyncSetup = false;
+
+function getViewTotalDays() {
+  let total = 0;
+  for (let i = 0; i < GANTT_VIEW_MONTHS; i++) {
+    const y = ganttYear + Math.floor((ganttMonth + i) / 12);
+    const m = (ganttMonth + i) % 12;
+    total += new Date(y, m + 1, 0).getDate();
+  }
+  return total;
+}
+function getViewStart() { return new Date(ganttYear, ganttMonth, 1); }
+function getViewEnd() {
+  const y = ganttYear + Math.floor((ganttMonth + GANTT_VIEW_MONTHS - 1) / 12);
+  const m = (ganttMonth + GANTT_VIEW_MONTHS - 1) % 12;
+  return new Date(y, m + 1, 0);
+}
+function getDayOffset(date) {
+  return Math.round((date - getViewStart()) / 86400000);
+}
+function getDateFromOffset(offset) {
+  const d = new Date(getViewStart());
+  d.setDate(d.getDate() + offset);
+  return dateToStr(d);
+}
 
 // ── View toggle ──
 window.showGantt = () => {
@@ -2663,8 +2710,10 @@ function setupGanttScrollSync() {
 
 // ── Render ──
 function renderGantt() {
-  ganttDaysInMonth = new Date(ganttYear, ganttMonth + 1, 0).getDate();
-  const totalW = ganttDaysInMonth * ganttColWidth;
+  const totalDays = getViewTotalDays();
+  const totalW    = totalDays * ganttColWidth;
+  const viewStart = getViewStart();
+  const viewEnd   = getViewEnd();
 
   document.getElementById('ganttMonthLabel').textContent =
     ganttYear + '.' + String(ganttMonth + 1).padStart(2, '0');
@@ -2680,25 +2729,41 @@ function renderGantt() {
   headerEl.style.width = totalW + 'px';
   innerEl.style.width  = totalW + 'px';
 
-  // ── Header days ──
-  for (let d = 1; d <= ganttDaysInMonth; d++) {
-    const day = new Date(ganttYear, ganttMonth, d);
-    const isWE   = day.getDay() === 0 || day.getDay() === 6;
-    const isToday = dateToStr(day) === todayStr();
-    const col = document.createElement('div');
-    col.className = 'gantt-day-col' + (isWE ? ' weekend' : '') + (isToday ? ' today-col' : '');
-    col.style.width = ganttColWidth + 'px';
-    col.textContent = d;
-    headerEl.appendChild(col);
+  // ── Header: month row + day row ──
+  const monthRow = document.createElement('div');
+  monthRow.className = 'gantt-month-header-row';
+  const dayRow = document.createElement('div');
+  dayRow.className = 'gantt-day-header-row';
+
+  for (let mi = 0; mi < GANTT_VIEW_MONTHS; mi++) {
+    const yr = ganttYear + Math.floor((ganttMonth + mi) / 12);
+    const mo = (ganttMonth + mi) % 12;
+    const daysInMo = new Date(yr, mo + 1, 0).getDate();
+
+    const mCell = document.createElement('div');
+    mCell.className = 'gantt-month-cell';
+    mCell.style.width = (daysInMo * ganttColWidth) + 'px';
+    mCell.textContent = yr + '.' + String(mo + 1).padStart(2, '0');
+    monthRow.appendChild(mCell);
+
+    for (let d = 1; d <= daysInMo; d++) {
+      const day = new Date(yr, mo, d);
+      const isWE    = day.getDay() === 0 || day.getDay() === 6;
+      const isToday = dateToStr(day) === todayStr();
+      const col = document.createElement('div');
+      col.className = 'gantt-day-col' + (isWE ? ' weekend' : '') + (isToday ? ' today-col' : '');
+      col.style.width = ganttColWidth + 'px';
+      col.textContent = d;
+      dayRow.appendChild(col);
+    }
   }
+  headerEl.appendChild(monthRow);
+  headerEl.appendChild(dayRow);
 
   const sorted = [...ganttTasks].sort((a, b) => a.startDate.localeCompare(b.startDate));
-  const monthStart = new Date(ganttYear, ganttMonth, 1);
-  const monthEnd   = new Date(ganttYear, ganttMonth + 1, 0);
 
   // ── Task rows ──
   sorted.forEach(task => {
-    // Label
     const labelRow = document.createElement('div');
     labelRow.className = 'gantt-label-row';
     const member = MEMBERS.find(m => m.name === task.assignee);
@@ -2707,17 +2772,15 @@ function renderGantt() {
       (member ? `<span style="font-size:16px;flex-shrink:0">${member.emoji}</span>` : '');
     labelsEl.appendChild(labelRow);
 
-    // Grid row
-    const row = createGanttRow(ganttDaysInMonth, ganttColWidth);
+    const row = createGanttRow();
     rowsEl.appendChild(row);
 
-    // Bar
     const tS = parseDate(task.startDate);
     const tE = parseDate(task.endDate);
-    if (tS <= monthEnd && tE >= monthStart) {
-      const visS = tS < monthStart ? monthStart : tS;
-      const visE = tE > monthEnd   ? monthEnd   : tE;
-      const startOff = Math.round((visS - monthStart) / 86400000);
+    if (tS <= viewEnd && tE >= viewStart) {
+      const visS     = tS < viewStart ? viewStart : tS;
+      const visE     = tE > viewEnd   ? viewEnd   : tE;
+      const startOff = getDayOffset(visS);
       const dur      = Math.round((visE - visS) / 86400000) + 1;
       const bar = document.createElement('div');
       bar.className = 'gantt-bar';
@@ -2733,13 +2796,13 @@ function renderGantt() {
     }
   });
 
-  // ── Empty rows for drag-to-create ──
-  const emptyCount = Math.max(6, 12 - sorted.length);
+  // ── Empty rows (guarantee minimum 6 rows) ──
+  const emptyCount = Math.max(0, 6 - sorted.length);
   for (let i = 0; i < emptyCount; i++) {
     const emptyLabel = document.createElement('div');
     emptyLabel.className = 'gantt-label-row gantt-label-empty';
     labelsEl.appendChild(emptyLabel);
-    rowsEl.appendChild(createGanttRow(ganttDaysInMonth, ganttColWidth));
+    rowsEl.appendChild(createGanttRow());
   }
 
   if (sorted.length === 0) {
@@ -2754,27 +2817,40 @@ function renderGantt() {
     rowsEl.appendChild(hint);
   }
 
-  // Today line
-  const today = new Date();
-  if (today.getFullYear() === ganttYear && today.getMonth() === ganttMonth) {
+  // ── Today line ──
+  const todayOff = getDayOffset(new Date());
+  if (todayOff >= 0 && todayOff < totalDays) {
     const line = document.createElement('div');
     line.className = 'gantt-today-line';
-    line.style.left = ((today.getDate() - 1) * ganttColWidth + ganttColWidth / 2) + 'px';
+    line.style.left = (todayOff * ganttColWidth + ganttColWidth / 2) + 'px';
     rowsEl.appendChild(line);
   }
+
+  // ── Add row ──
+  const addLabel = document.createElement('div');
+  addLabel.className = 'gantt-label-row gantt-add-row';
+  addLabel.textContent = '+ 작업 추가';
+  addLabel.onclick = () => openCreateGanttTask('', '');
+  labelsEl.appendChild(addLabel);
+  rowsEl.appendChild(createGanttRow());
 
   setupGanttDrag();
 }
 
-function createGanttRow(days, colW) {
+function createGanttRow() {
   const row = document.createElement('div');
   row.className = 'gantt-row';
-  for (let d = 1; d <= days; d++) {
-    const cell = document.createElement('div');
-    const day  = new Date(ganttYear, ganttMonth, d);
-    cell.className = 'gantt-row-cell' + (day.getDay() === 0 || day.getDay() === 6 ? ' weekend' : '');
-    cell.style.width = colW + 'px';
-    row.appendChild(cell);
+  for (let mi = 0; mi < GANTT_VIEW_MONTHS; mi++) {
+    const yr = ganttYear + Math.floor((ganttMonth + mi) / 12);
+    const mo = (ganttMonth + mi) % 12;
+    const daysInMo = new Date(yr, mo + 1, 0).getDate();
+    for (let d = 1; d <= daysInMo; d++) {
+      const cell = document.createElement('div');
+      const day  = new Date(yr, mo, d);
+      cell.className = 'gantt-row-cell' + (day.getDay() === 0 || day.getDay() === 6 ? ' weekend' : '');
+      cell.style.width = ganttColWidth + 'px';
+      row.appendChild(cell);
+    }
   }
   return row;
 }
@@ -2782,6 +2858,7 @@ function createGanttRow(days, colW) {
 // ── Drag to create ──
 function setupGanttDrag() {
   const rowsEl = document.getElementById('ganttGridRows');
+  rowsEl.removeEventListener('mousedown', ganttMouseDown);
   rowsEl.addEventListener('mousedown', ganttMouseDown);
 }
 
@@ -2800,7 +2877,7 @@ function getGanttDayFromMouse(e) {
   const rows = document.getElementById('ganttGridRows');
   const rect = rows.getBoundingClientRect();
   const x    = e.clientX - rect.left + wrap.scrollLeft;
-  return Math.max(0, Math.min(ganttDaysInMonth - 1, Math.floor(x / ganttColWidth)));
+  return Math.max(0, Math.min(getViewTotalDays() - 1, Math.floor(x / ganttColWidth)));
 }
 
 document.addEventListener('mousemove', e => {
@@ -2815,8 +2892,8 @@ document.addEventListener('mouseup', e => {
   removeGanttDragPreview();
   const s = Math.min(ganttDragStartDay, ganttDragCurrentDay);
   const en = Math.max(ganttDragStartDay, ganttDragCurrentDay);
-  const startStr = dateToStr(new Date(ganttYear, ganttMonth, s + 1));
-  const endStr   = dateToStr(new Date(ganttYear, ganttMonth, en + 1));
+  const startStr = dateToStr(getDateFromOffset(s));
+  const endStr   = dateToStr(getDateFromOffset(en));
   openCreateGanttTask(startStr, endStr);
 });
 
