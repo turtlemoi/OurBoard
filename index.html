@@ -436,11 +436,16 @@
     .sp-section-title {
       font-size: 13px; font-weight: 700; margin-bottom: 8px; color: var(--text);
     }
+    .sp-desc-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
     .sp-desc {
       font-size: 13px; line-height: 1.7;
       border: none; outline: none; width: 100%;
       background: transparent; font-family: inherit; color: var(--text);
-      resize: none; overflow: hidden; min-height: 0; flex: 1;
+      resize: none; overflow: hidden; min-height: 200px; flex: none;
       padding: 6px 4px; border-radius: 4px;
     }
     .sp-desc:hover { background: #f8f9fa; }
@@ -450,7 +455,7 @@
     /* ─── Images ─── */
     .sp-images {
       display: flex; flex-direction: column; gap: 10px;
-      margin-top: 16px;
+      margin-top: 12px;
     }
     .sp-image-block {
       position: relative; border-radius: 8px; overflow: hidden;
@@ -1061,11 +1066,12 @@
 
       <div class="sp-body">
         <div class="sp-section-title">설명</div>
-        <textarea class="sp-desc" id="spDesc" placeholder="자세한 내용을 입력하세요..."
-          onblur="savePanelField('description', this.value)"></textarea>
-        <div class="sp-paste-hint">이미지를 Ctrl+V로 붙여넣을 수 있습니다</div>
-
-        <div class="sp-images" id="spImages"></div>
+        <div class="sp-desc-area">
+          <textarea class="sp-desc" id="spDesc" placeholder="자세한 내용을 입력하세요..."
+            onblur="savePanelField('description', this.value)"></textarea>
+          <div class="sp-images" id="spImages"></div>
+          <div class="sp-paste-hint">이미지를 Ctrl+V로 붙여넣을 수 있습니다</div>
+        </div>
 
         <div class="sp-footer">
           <button class="btn btn-danger" id="spDeleteBtn">삭제</button>
@@ -1765,9 +1771,12 @@ window.openDetail = (id) => {
 
   document.getElementById('sidePanel').classList.add('open');
 
-  // re-calculate title height after panel becomes visible
+  // re-calculate title height and desc min-height after panel becomes visible
   requestAnimationFrame(() => {
     autoResizeTextarea(document.getElementById('spTitle'));
+    const descEl = document.getElementById('spDesc');
+    const top = descEl.getBoundingClientRect().top;
+    descEl.style.minHeight = Math.max(200, window.innerHeight - top - 80) + 'px';
   });
 
   // highlight selected card
