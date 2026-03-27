@@ -1292,6 +1292,10 @@
       </div>
     </div>
     <div class="form-group">
+      <label>작업내용</label>
+      <textarea id="ganttTaskContent" placeholder="작업 내용을 입력하세요" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;resize:vertical;min-height:80px;line-height:1.5"></textarea>
+    </div>
+    <div class="form-group">
       <label>담당자</label>
       <select id="ganttTaskAssignee" style="width:100%;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit">
         <option value="">없음</option>
@@ -2790,7 +2794,7 @@ function renderGantt() {
       bar.innerHTML =
         `<span class="gantt-bar-title">${task.title}</span>` +
         (member ? `<span style="font-size:14px">${member.emoji}</span>` : '');
-      bar.title = task.title;
+      bar.title = task.title + (task.content ? '\n' + task.content : '');
       bar.addEventListener('click', e => { e.stopPropagation(); openEditGanttTask(task.id); });
       row.appendChild(bar);
     }
@@ -2943,9 +2947,10 @@ function renderGanttColorSwatches() {
 function openCreateGanttTask(start, end) {
   editingGanttId    = null;
   selectedGanttColor = CAL_COLORS[0];
-  document.getElementById('ganttTaskTitle').value  = '';
-  document.getElementById('ganttTaskStart').value  = start;
-  document.getElementById('ganttTaskEnd').value    = end;
+  document.getElementById('ganttTaskTitle').value   = '';
+  document.getElementById('ganttTaskContent').value = '';
+  document.getElementById('ganttTaskStart').value   = start;
+  document.getElementById('ganttTaskEnd').value     = end;
   document.getElementById('ganttModalTitle').textContent = '작업 추가';
   document.getElementById('ganttDeleteBtn').classList.add('hidden');
   buildGanttAssigneeSelect('');
@@ -2959,9 +2964,10 @@ function openEditGanttTask(id) {
   if (!task) return;
   editingGanttId     = id;
   selectedGanttColor = task.color || CAL_COLORS[0];
-  document.getElementById('ganttTaskTitle').value  = task.title;
-  document.getElementById('ganttTaskStart').value  = task.startDate;
-  document.getElementById('ganttTaskEnd').value    = task.endDate;
+  document.getElementById('ganttTaskTitle').value   = task.title;
+  document.getElementById('ganttTaskContent').value = task.content || '';
+  document.getElementById('ganttTaskStart').value   = task.startDate;
+  document.getElementById('ganttTaskEnd').value     = task.endDate;
   document.getElementById('ganttModalTitle').textContent = '작업 수정';
   document.getElementById('ganttDeleteBtn').classList.remove('hidden');
   buildGanttAssigneeSelect(task.assignee || '');
@@ -2983,6 +2989,7 @@ window.saveGanttTask = async () => {
   if (start > end) [start, end] = [end, start];
   const data = {
     title,
+    content: document.getElementById('ganttTaskContent').value.trim(),
     startDate: start,
     endDate: end,
     assignee: document.getElementById('ganttTaskAssignee').value,
