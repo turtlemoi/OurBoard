@@ -912,6 +912,7 @@
         <div class="sp-section-title">설명</div>
         <div class="sp-desc-area">
           <textarea class="sp-desc" id="spDesc" placeholder="자세한 내용을 입력하세요..."
+            oninput="autoResizeTextarea(this)"
             onblur="savePanelField('description', this.value)"></textarea>
           <div class="sp-images" id="spImages"></div>
           <div class="sp-paste-hint">이미지를 Ctrl+V로 붙여넣을 수 있습니다</div>
@@ -1570,6 +1571,7 @@ window.openDetail = (id) => {
     const descEl = document.getElementById('spDesc');
     const top = descEl.getBoundingClientRect().top;
     descEl.style.minHeight = Math.max(200, window.innerHeight - top - 80) + 'px';
+    autoResizeTextarea(descEl);
   });
 
   // highlight selected card
@@ -1710,6 +1712,9 @@ document.getElementById('spDesc').addEventListener('paste', async e => {
   const items = [...(e.clipboardData?.items || [])];
   const imgItem = items.find(i => i.type.startsWith('image/'));
   if (!imgItem) return;
+  // 텍스트 콘텐츠도 함께 있으면 일반 텍스트 붙여넣기로 처리 (이미지 무시)
+  const hasText = items.some(i => i.kind === 'string');
+  if (hasText) return;
   e.preventDefault();
 
   const file = imgItem.getAsFile();
